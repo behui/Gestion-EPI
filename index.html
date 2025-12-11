@@ -806,7 +806,7 @@
 
         async function loadData() {
             try {
-                // Essayer de charger depuis Firebase
+                // TOUJOURS charger depuis Firebase en priorité
                 const { getDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
                 const docRef = doc(window.firebaseDB, 'casiers', 'data');
                 const docSnap = await getDoc(docRef);
@@ -815,23 +815,36 @@
                     const data = docSnap.data();
                     if (data.lockers && data.lockers.length === 288) {
                         lockers = data.lockers;
+                        
+                        // Compter les statuts
+                        const stats = {
+                            libre: lockers.filter(l => l.statut === 'LIBRE').length,
+                            attente: lockers.filter(l => l.statut === 'EN ATTENTE').length,
+                            occupe: lockers.filter(l => l.statut === 'OCCUPÉ').length,
+                            inactif: lockers.filter(l => l.statut === 'INACTIF').length
+                        };
+                        
                         console.log('✅ Données chargées depuis Firebase');
+                        console.log('📊 Statuts:', stats);
+                        
                         // Sauvegarder aussi en local
                         localStorage.setItem('ppve_lockers', JSON.stringify(lockers));
                         return true;
                     }
                 }
+                
+                console.warn('⚠️ Aucune donnée dans Firebase');
             } catch (error) {
-                console.error('⚠️ Erreur chargement Firebase, essai localStorage:', error);
+                console.error('❌ Erreur chargement Firebase:', error);
             }
             
-            // Fallback sur localStorage
+            // Fallback sur localStorage SEULEMENT si Firebase a échoué
             const stored = localStorage.getItem('ppve_lockers');
             if (stored) {
                 const data = JSON.parse(stored);
                 if (data.length === 288) {
                     lockers = data;
-                    console.log('✅ Données chargées depuis localStorage');
+                    console.log('⚠️ Données chargées depuis localStorage (fallback)');
                     return true;
                 }
             }
@@ -840,13 +853,22 @@
         
         // Synchronisation temps réel
         let isLocalUpdate = false;
+        let isInitialLoad = true;
+        let syncUnsubscribe = null;
         
         function setupRealtimeSync() {
             import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
                 .then(({ onSnapshot, doc }) => {
                     const docRef = doc(window.firebaseDB, 'casiers', 'data');
                     
-                    onSnapshot(docRef, (snapshot) => {
+                    syncUnsubscribe = onSnapshot(docRef, (snapshot) => {
+                        // Ignorer le premier snapshot (chargement initial)
+                        if (isInitialLoad) {
+                            isInitialLoad = false;
+                            console.log('🎯 Synchronisation temps réel activée');
+                            return;
+                        }
+                        
                         // Ignorer si c'est notre propre mise à jour
                         if (isLocalUpdate) {
                             isLocalUpdate = false;
@@ -861,12 +883,12 @@
                                 
                                 // Mettre à jour seulement si les données ont changé
                                 if (oldData !== newData) {
+                                    console.log('🔄 Mise à jour détectée depuis un autre utilisateur');
                                     lockers = data.lockers;
                                     localStorage.setItem('ppve_lockers', JSON.stringify(lockers));
                                     updateStats();
                                     renderLockers();
                                     renderUserLockers();
-                                    console.log('🔄 Données synchronisées en temps réel');
                                 }
                             }
                         }
@@ -1199,14 +1221,19 @@
             // Attendre que Firebase soit prêt
             await new Promise(resolve => setTimeout(resolve, 500));
             
+            // Charger les données
             const loaded = await loadData();
             if (!loaded) {
                 initLockers();
                 await saveData();
             }
             
+            // Afficher l'interface
             updateStats();
             renderLockers();
+            
+            // Attendre un peu avant d'activer la sync pour éviter le premier snapshot
+            await new Promise(resolve => setTimeout(resolve, 300));
             
             // Activer la synchronisation temps réel
             setupRealtimeSync();
