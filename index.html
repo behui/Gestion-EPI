@@ -4,6 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🏭 Gestion Casiers PPVE - 288 Casiers</title>
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMPBik5vpX8qOYWuhPzpJZoOLjE20pl6g",
+            authDomain: "gestion-epi-4387a.firebaseapp.com",
+            projectId: "gestion-epi-4387a",
+            storageBucket: "gestion-epi-4387a.firebasestorage.app",
+            messagingSenderId: "974706767408",
+            appId: "1:974706767408:web:fde01e52a3a986d6da9ff5",
+            measurementId: "G-PKNXH32P0Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+        
+        window.firebaseDB = db;
+        window.firebaseApp = app;
+    </script>
+    
     <style>
         * {
             margin: 0;
@@ -754,24 +779,104 @@
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // 💾 STORAGE
+        // 💾 FIREBASE STORAGE
         // ═══════════════════════════════════════════════════════════════
         
-        function saveData() {
-            localStorage.setItem('ppve_lockers', JSON.stringify(lockers));
+        async function saveData() {
+            try {
+                // Marquer comme mise à jour locale pour éviter le reboucle du listener
+                isLocalUpdate = true;
+                
+                // Sauvegarder aussi en localStorage comme backup
+                localStorage.setItem('ppve_lockers', JSON.stringify(lockers));
+                
+                // Sauvegarder dans Firebase
+                const { setDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+                await setDoc(doc(window.firebaseDB, 'casiers', 'data'), {
+                    lockers: lockers,
+                    lastUpdate: new Date().toISOString()
+                });
+                console.log('✅ Données sauvegardées dans Firebase');
+            } catch (error) {
+                console.error('❌ Erreur sauvegarde Firebase:', error);
+                alert('⚠️ Erreur lors de la sauvegarde. Les données sont sauvegardées localement.');
+                isLocalUpdate = false;
+            }
         }
 
-        function loadData() {
+        async function loadData() {
+            try {
+                // Essayer de charger depuis Firebase
+                const { getDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+                const docRef = doc(window.firebaseDB, 'casiers', 'data');
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.lockers && data.lockers.length === 288) {
+                        lockers = data.lockers;
+                        console.log('✅ Données chargées depuis Firebase');
+                        // Sauvegarder aussi en local
+                        localStorage.setItem('ppve_lockers', JSON.stringify(lockers));
+                        return true;
+                    }
+                }
+            } catch (error) {
+                console.error('⚠️ Erreur chargement Firebase, essai localStorage:', error);
+            }
+            
+            // Fallback sur localStorage
             const stored = localStorage.getItem('ppve_lockers');
             if (stored) {
                 const data = JSON.parse(stored);
                 if (data.length === 288) {
                     lockers = data;
-                    console.log('✅ Données chargées');
+                    console.log('✅ Données chargées depuis localStorage');
                     return true;
                 }
             }
             return false;
+        }
+        
+        // Synchronisation temps réel
+        let isLocalUpdate = false;
+        
+        function setupRealtimeSync() {
+            import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+                .then(({ onSnapshot, doc }) => {
+                    const docRef = doc(window.firebaseDB, 'casiers', 'data');
+                    
+                    onSnapshot(docRef, (snapshot) => {
+                        // Ignorer si c'est notre propre mise à jour
+                        if (isLocalUpdate) {
+                            isLocalUpdate = false;
+                            return;
+                        }
+                        
+                        if (snapshot.exists()) {
+                            const data = snapshot.data();
+                            if (data.lockers && data.lockers.length === 288) {
+                                const oldData = JSON.stringify(lockers);
+                                const newData = JSON.stringify(data.lockers);
+                                
+                                // Mettre à jour seulement si les données ont changé
+                                if (oldData !== newData) {
+                                    lockers = data.lockers;
+                                    localStorage.setItem('ppve_lockers', JSON.stringify(lockers));
+                                    updateStats();
+                                    renderLockers();
+                                    renderUserLockers();
+                                    console.log('🔄 Données synchronisées en temps réel');
+                                }
+                            }
+                        }
+                    }, (error) => {
+                        console.error('❌ Erreur sync temps réel:', error);
+                    });
+                })
+                .catch(error => {
+                    console.warn('⚠️ Sync temps réel non disponible:', error);
+                });
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -826,7 +931,7 @@
             document.getElementById('validation-modal').classList.add('active');
         }
 
-        function confirmValidation() {
+        async function confirmValidation() {
             if (!currentValidationLockerId) return;
             
             const locker = lockers.find(l => l.id === currentValidationLockerId);
@@ -834,7 +939,7 @@
             
             locker.statut = 'OCCUPÉ';
             
-            saveData();
+            await saveData();
             updateStats();
             renderLockers();
             renderUserLockers();
@@ -1020,7 +1125,7 @@
             document.getElementById(modalId).classList.remove('active');
         }
 
-        function assignLocker(event) {
+        async function assignLocker(event) {
             event.preventDefault();
             
             const lockerId = document.getElementById('modal-locker-id').value;
@@ -1039,7 +1144,7 @@
             locker.refTuyau = refTuyau;
             locker.date = new Date().toLocaleDateString('fr-FR');
             
-            saveData();
+            await saveData();
             updateStats();
             renderLockers();
             closeModal('assign-modal');
@@ -1047,7 +1152,7 @@
             alert(`🟠 Casier ${lockerId} mis EN ATTENTE pour ${prenom} ${nom}`);
         }
 
-        function deactivateLocker(lockerId) {
+        async function deactivateLocker(lockerId) {
             if (!confirm(`Passer le casier ${lockerId} en INACTIF (nettoyage) ?`)) return;
             
             const locker = lockers.find(l => l.id === lockerId);
@@ -1055,7 +1160,7 @@
             
             locker.statut = 'INACTIF';
             
-            saveData();
+            await saveData();
             updateStats();
             renderLockers();
             renderUserLockers();
@@ -1063,7 +1168,7 @@
             alert(`⚫ Casier ${lockerId} → INACTIF (nettoyage)`);
         }
 
-        function reactivateLocker(lockerId) {
+        async function reactivateLocker(lockerId) {
             if (!confirm(`Remettre le casier ${lockerId} en service (LIBRE) ?`)) return;
             
             const locker = lockers.find(l => l.id === lockerId);
@@ -1076,7 +1181,7 @@
             locker.refTuyau = '';
             locker.date = '';
             
-            saveData();
+            await saveData();
             updateStats();
             renderLockers();
             renderUserLockers();
@@ -1088,18 +1193,25 @@
         // 🚀 INITIALIZATION
         // ═══════════════════════════════════════════════════════════════
         
-        function init() {
+        async function init() {
             console.log('🚀 Initialisation...');
             
-            if (!loadData()) {
+            // Attendre que Firebase soit prêt
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            const loaded = await loadData();
+            if (!loaded) {
                 initLockers();
-                saveData();
+                await saveData();
             }
             
             updateStats();
             renderLockers();
             
-            console.log('✅ Application prête');
+            // Activer la synchronisation temps réel
+            setupRealtimeSync();
+            
+            console.log('✅ Application prête avec Firebase');
         }
 
         document.addEventListener('DOMContentLoaded', init);
