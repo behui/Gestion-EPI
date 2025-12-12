@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧹 Nettoyage Complet Firebase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .user-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .user-item.deleted {
+            border-left-color: #ff6b6b;
+            background: #fff5f5;
+        }
+
+        .user-item.orphan {
+            border-left-color: #ffa500;
+            background: #fff8e1;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-email {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .user-details {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .badge.firestore {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge.auth {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .badge.both {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .badge.deleted {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ee5a52;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #ffa500;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #ff8c00;
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .alert.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .instructions {
+            background: #fff8e1;
+            border-left: 4px solid #ffa500;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .instructions h3 {
+            color: #f57c00;
+            margin-bottom: 10px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin: 8px 0;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .console-link {
+            display: inline-block;
+            padding: 12px 25px;
+            background: #ff6b6b;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .console-link:hover {
+            background: #ee5a52;
+            transform: translateY(-2px);
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧹 Nettoyage Complet Firebase</h1>
+            <p>Gestion et nettoyage des utilisateurs - Authentication & Firestore</p>
+        </div>
+
+        <div id="alertBox" class="alert"></div>
+
+        <div class="card">
+            <h2>📊 Statistiques</h2>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-number" id="statFirestore">-</div>
+                    <div class="stat-label">Profils Firestore</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="statDeleted">-</div>
+                    <div class="stat-label">Utilisateurs Supprimés</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="statOrphans">-</div>
+                    <div class="stat-label">Comptes Auth Orphelins</div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="scanAll()">🔄 Actualiser</button>
+                <button class="btn btn-danger" onclick="cleanupDeletedUsers()">🧹 Nettoyer les traces de suppression</button>
+                <button class="btn btn-warning" onclick="showAuthInstructions()">📋 Instructions Auth Cleanup</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>👥 Profils Firestore Actifs</h2>
+            <div id="firestoreUsers" class="user-list">
+                <div class="loading">🔍 Chargement...</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🗑️ Utilisateurs Supprimés (Traces)</h2>
+            <div id="deletedUsers" class="user-list">
+                <div class="loading">🔍 Chargement...</div>
+            </div>
+        </div>
+
+        <div id="authInstructions" class="card" style="display: none;">
+            <h2>⚠️ Nettoyage Firebase Authentication</h2>
+            <div class="instructions">
+                <h3>🚨 IMPORTANT: Les comptes Authentication ne peuvent PAS être supprimés depuis le navigateur</h3>
+                <p style="margin-bottom: 15px;">Pour supprimer complètement les comptes Authentication, vous devez:</p>
+                
+                <h3>OPTION 1 - MANUEL (Immédiat) ✅</h3>
+                <ol>
+                    <li>Ouvrez la <a href="https://console.firebase.google.com" target="_blank" class="console-link">Console Firebase</a></li>
+                    <li>Sélectionnez votre projet</li>
+                    <li>Allez dans <strong>Authentication → Users</strong></li>
+                    <li>Trouvez les utilisateurs à supprimer</li>
+                    <li>Cliquez sur les <strong>3 points (⋮)</strong> → <strong>Supprimer le compte</strong></li>
+                </ol>
+
+                <h3 style="margin-top: 20px;">OPTION 2 - AUTOMATIQUE (Cloud Function) 🚀</h3>
+                <p>Déployez la Cloud Function qui supprime automatiquement les comptes Auth quand vous supprimez depuis l'interface admin.</p>
+                <ol>
+                    <li>Installez Firebase CLI: <pre>npm install -g firebase-tools</pre></li>
+                    <li>Initialisez Functions dans votre projet (si pas déjà fait)</li>
+                    <li>Créez le fichier <code>functions/index.js</code> avec le code ci-dessous</li>
+                    <li>Déployez: <pre>firebase deploy --only functions</pre></li>
+                </ol>
+
+                <h3 style="margin-top: 20px;">Code de la Cloud Function:</h3>
+                <pre>const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+admin.initializeApp();
+
+exports.deleteAuthUserOnFirestoreDelete = functions.firestore
+    .document('users/{userId}')
+    .onDelete(async (snap, context) => {
+        const userId = context.params.userId;
+        try {
+            await admin.auth().deleteUser(userId);
+            console.log(`✅ Auth account ${userId} supprimé`);
+        } catch (error) {
+            console.error(`❌ Erreur suppression Auth ${userId}:`, error);
+        }
+    });</pre>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, getDocs, doc, getDoc, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMPBik5vpX8qOYWuhPzpJZoOLjE20pl6g",
+            authDomain: "gestion-epi-4387a.firebaseapp.com",
+            projectId: "gestion-epi-4387a",
+            storageBucket: "gestion-epi-4387a.firebasestorage.app",
+            messagingSenderId: "974706767408",
+            appId: "1:974706767408:web:fde01e52a3a986d6da9ff5",
+            measurementId: "G-PKNXH32P0Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.db = db;
+        window.auth = auth;
+        
+        // 🚨 VÉRIFICATION ADMIN OBLIGATOIRE
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                alert('⛔ Accès refusé : Vous devez être connecté');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Vérifier le rôle admin
+            try {
+                const userDoc = await getDoc(doc(db, 'users', user.email));
+                if (!userDoc.exists()) {
+                    alert('⛔ Accès refusé : Profil utilisateur introuvable');
+                    window.location.href = 'gestion-casiers.html';
+                    return;
+                }
+                
+                const userData = userDoc.data();
+                if (userData.role !== 'admin') {
+                    alert('⛔ Accès refusé : Cet outil est réservé aux administrateurs');
+                    window.location.href = 'gestion-casiers.html';
+                    return;
+                }
+                
+                // Admin vérifié
+                console.log('✅ Administrateur vérifié:', user.email);
+                document.getElementById('currentUser').textContent = user.email + ' (ADMIN)';
+                
+            } catch (error) {
+                console.error('Erreur vérification admin:', error);
+                alert('⛔ Erreur de vérification des permissions');
+                window.location.href = 'gestion-casiers.html';
+            }
+        });
+
+        function showAlert(message, type = 'info') {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = `alert ${type}`;
+            alertBox.style.display = 'block';
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+
+        window.showAlert = showAlert;
+
+        async function scanAll() {
+            showAlert('🔍 Scan en cours...', 'info');
+            
+            try {
+                // Scan Firestore users
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                const firestoreUsers = [];
+                usersSnapshot.forEach(doc => {
+                    firestoreUsers.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Scan deleted_users
+                const deletedSnapshot = await getDocs(collection(db, 'deleted_users'));
+                const deletedUsers = [];
+                deletedSnapshot.forEach(doc => {
+                    deletedUsers.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Update stats
+                document.getElementById('statFirestore').textContent = firestoreUsers.length;
+                document.getElementById('statDeleted').textContent = deletedUsers.length;
+                document.getElementById('statOrphans').textContent = deletedUsers.length;
+
+                // Display Firestore users
+                displayFirestoreUsers(firestoreUsers);
+                
+                // Display deleted users
+                displayDeletedUsers(deletedUsers);
+
+                showAlert('✅ Scan terminé!', 'success');
+            } catch (error) {
+                console.error('❌ Erreur scan:', error);
+                showAlert('❌ Erreur: ' + error.message, 'error');
+            }
+        }
+
+        function displayFirestoreUsers(users) {
+            const container = document.getElementById('firestoreUsers');
+            
+            if (users.length === 0) {
+                container.innerHTML = '<div class="loading">Aucun utilisateur actif</div>';
+                return;
+            }
+
+            container.innerHTML = users.map(user => `
+                <div class="user-item">
+                    <div class="user-info">
+                        <div class="user-email">
+                            <span class="badge both">✓ Firestore</span>
+                            ${user.email}
+                        </div>
+                        <div class="user-details">
+                            ${user.prenom} ${user.nom} - ${user.role || 'N/A'}
+                            ${user.createdAt ? `- Créé le ${new Date(user.createdAt).toLocaleDateString('fr-FR')}` : ''}
+                        </div>
+                    </div>
+                    <button class="btn btn-danger" onclick="deleteFirestoreUser('${user.id}', '${user.email}')">
+                        🗑️ Supprimer
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function displayDeletedUsers(users) {
+            const container = document.getElementById('deletedUsers');
+            
+            if (users.length === 0) {
+                container.innerHTML = '<div class="loading">✅ Aucune trace de suppression</div>';
+                return;
+            }
+
+            container.innerHTML = users.map(user => `
+                <div class="user-item deleted">
+                    <div class="user-info">
+                        <div class="user-email">
+                            <span class="badge deleted">🗑️ Supprimé</span>
+                            <span class="badge auth">⚠️ Auth existe encore</span>
+                            ${user.email}
+                        </div>
+                        <div class="user-details">
+                            ${user.userName || 'N/A'} - Supprimé le ${new Date(user.deletedAt).toLocaleString('fr-FR')}
+                            ${user.deletedBy ? `par ${user.deletedBy}` : ''}
+                        </div>
+                    </div>
+                    <button class="btn btn-warning" onclick="cleanupDeletedUser('${user.id}')">
+                        🧹 Nettoyer trace
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        window.deleteFirestoreUser = async function(userId, email) {
+            const confirmText = prompt(`⚠️ SUPPRESSION FIRESTORE\n\nCeci supprime le profil Firestore de:\n${email}\n\n⚠️ Le compte Authentication restera actif!\n\nPour confirmer, tapez: SUPPRIMER`);
+            
+            if (confirmText !== 'SUPPRIMER') {
+                return;
+            }
+
+            try {
+                await deleteDoc(doc(db, 'users', userId));
+                showAlert(`✅ Profil Firestore supprimé. ⚠️ Compte Auth toujours actif!`, 'warning');
+                scanAll();
+            } catch (error) {
+                console.error('❌ Erreur:', error);
+                showAlert('❌ Erreur: ' + error.message, 'error');
+            }
+        };
+
+        window.cleanupDeletedUser = async function(userId) {
+            const confirmText = prompt(`🧹 NETTOYAGE TRACE\n\nCeci supprime la trace de suppression.\n\n⚠️ Le compte Authentication restera actif!\n\nPour confirmer, tapez: NETTOYER`);
+            
+            if (confirmText !== 'NETTOYER') {
+                return;
+            }
+
+            try {
+                await deleteDoc(doc(db, 'deleted_users', userId));
+                showAlert('✅ Trace nettoyée', 'success');
+                scanAll();
+            } catch (error) {
+                console.error('❌ Erreur:', error);
+                showAlert('❌ Erreur: ' + error.message, 'error');
+            }
+        };
+
+        window.cleanupDeletedUsers = async function() {
+            const confirmText = prompt(`🧹 NETTOYAGE COMPLET\n\nCeci supprime TOUTES les traces de suppression.\n\n⚠️ Les comptes Authentication resteront actifs!\n\nPour confirmer, tapez: NETTOYER TOUT`);
+            
+            if (confirmText !== 'NETTOYER TOUT') {
+                return;
+            }
+
+            try {
+                const deletedSnapshot = await getDocs(collection(db, 'deleted_users'));
+                let count = 0;
+                
+                for (const docSnapshot of deletedSnapshot.docs) {
+                    await deleteDoc(doc(db, 'deleted_users', docSnapshot.id));
+                    count++;
+                }
+                
+                showAlert(`✅ ${count} traces nettoyées`, 'success');
+                scanAll();
+            } catch (error) {
+                console.error('❌ Erreur:', error);
+                showAlert('❌ Erreur: ' + error.message, 'error');
+            }
+        };
+
+        window.showAuthInstructions = function() {
+            const instructions = document.getElementById('authInstructions');
+            instructions.style.display = instructions.style.display === 'none' ? 'block' : 'none';
+        };
+
+        window.scanAll = scanAll;
+
+        // Auto-scan on load
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log('✅ Connecté:', user.email);
+                scanAll();
+            } else {
+                showAlert('❌ Vous devez être connecté', 'error');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
