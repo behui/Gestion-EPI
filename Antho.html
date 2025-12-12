@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Équipements - PPVE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-role {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .equipment-list {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .equipment-item {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: grid;
+            grid-template-columns: 1fr 150px 150px 100px;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .equipment-item:last-child {
+            border-bottom: none;
+        }
+
+        .equipment-item:hover {
+            background: #f8f9fa;
+        }
+
+        .equipment-info h3 {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .equipment-info p {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .equipment-status {
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .equipment-status.disponible {
+            color: #28a745;
+        }
+
+        .equipment-status.assigne {
+            color: #dc3545;
+        }
+
+        .equipment-date {
+            color: #666;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .equipment-actions {
+            display: flex;
+            gap: 5px;
+            justify-content: flex-end;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #333;
+            font-size: 22px;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #5a6268;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📦 Gestion Équipements</h1>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-name" id="userName">Chargement...</div>
+                <div class="user-role" id="userRole"></div>
+            </div>
+            <button class="btn btn-secondary" onclick="window.location.href='gestion-casiers.html'">🔒 Casiers</button>
+            <button class="btn btn-secondary" id="adminButton" style="display: none;" onclick="window.location.href='admin-test.html'">⚙️ Admin</button>
+            <button class="btn btn-danger" onclick="logout()">Déconnexion</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalEquipments">0</div>
+                <div class="stat-label">Total Équipements</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="availableEquipments">0</div>
+                <div class="stat-label">Disponibles</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="assignedEquipments">0</div>
+                <div class="stat-label">Assignés</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="openAddModal()" id="btnAdd">➕ Ajouter un équipement</button>
+            <input type="text" id="searchInput" placeholder="🔍 Rechercher..." style="flex: 1; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px;">
+            <select id="filterStatus" style="padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px;">
+                <option value="all">Tous</option>
+                <option value="disponible">Disponibles</option>
+                <option value="assigne">Assignés</option>
+            </select>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+
+        <div id="equipmentList" class="equipment-list"></div>
+    </div>
+
+    <div id="equipmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Ajouter un équipement</h2>
+            </div>
+            <div class="modal-body">
+                <div id="modalError" class="error-message"></div>
+                <div id="modalSuccess" class="success-message"></div>
+                
+                <div class="form-group">
+                    <label>Nom de l'équipement *</label>
+                    <input type="text" id="equipmentName" placeholder="Ex: Casque de sécurité">
+                </div>
+                <div class="form-group">
+                    <label>Référence / Numéro de série *</label>
+                    <input type="text" id="equipmentReference" placeholder="Ex: REF-12345">
+                </div>
+                <div class="form-group">
+                    <label>Type *</label>
+                    <select id="equipmentType">
+                        <option value="">-- Sélectionner --</option>
+                        <option value="Casque">Casque</option>
+                        <option value="Gants">Gants</option>
+                        <option value="Chaussures">Chaussures</option>
+                        <option value="Lunettes">Lunettes</option>
+                        <option value="Masque">Masque</option>
+                        <option value="Gilet">Gilet</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Statut *</label>
+                    <select id="equipmentStatus">
+                        <option value="disponible">Disponible</option>
+                        <option value="assigne">Assigné</option>
+                    </select>
+                </div>
+                <div class="form-group" id="assignedToGroup" style="display: none;">
+                    <label>Assigné à</label>
+                    <input type="text" id="assignedTo" placeholder="Matricule ou nom">
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="equipmentNotes" placeholder="Informations complémentaires..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" onclick="closeModal()">Annuler</button>
+                <button class="btn btn-primary" id="btnSave" onclick="saveEquipment()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMPBik5vpX8qOYWuhPzpJZoOLjE20pl6g",
+            authDomain: "gestion-epi-4387a.firebaseapp.com",
+            projectId: "gestion-epi-4387a",
+            storageBucket: "gestion-epi-4387a.firebasestorage.app",
+            messagingSenderId: "974706767408",
+            appId: "1:974706767408:web:fde01e52a3a986d6da9ff5",
+            measurementId: "G-PKNXH32P0Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let equipments = [];
+        let editingId = null;
+
+        window.logout = async function() {
+            if (confirm('Voulez-vous vraiment vous déconnecter?')) {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            }
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (!userDoc.exists() || !userDoc.data().active) {
+                    await signOut(auth);
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                currentUser = userDoc.data();
+                document.getElementById('userName').textContent = currentUser.name || user.email;
+                document.getElementById('userRole').textContent = currentUser.role || 'Utilisateur';
+
+                if (currentUser.role === 'admin' || currentUser.role === 'superadmin') {
+                    document.getElementById('adminButton').style.display = 'block';
+                }
+
+                if (!currentUser.editEquipements && currentUser.role !== 'admin' && currentUser.role !== 'superadmin') {
+                    document.getElementById('btnAdd').style.display = 'none';
+                }
+
+                await loadEquipments();
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError('Erreur de chargement des données');
+            }
+        });
+
+        async function loadEquipments() {
+            try {
+                equipments = [];
+                const querySnapshot = await getDocs(collection(db, 'equipements'));
+                querySnapshot.forEach((doc) => {
+                    equipments.push({ id: doc.id, ...doc.data() });
+                });
+                renderEquipments();
+            } catch (error) {
+                console.error('Erreur chargement équipements:', error);
+                showError('Erreur lors du chargement des équipements');
+            }
+        }
+
+        function renderEquipments() {
+            const list = document.getElementById('equipmentList');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filterStatus = document.getElementById('filterStatus').value;
+
+            let filtered = equipments.filter(eq => {
+                if (filterStatus !== 'all' && eq.status !== filterStatus) return false;
+                if (searchTerm) {
+                    const searchText = `${eq.name} ${eq.reference} ${eq.type} ${eq.assignedTo || ''}`.toLowerCase();
+                    if (!searchText.includes(searchTerm)) return false;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="empty-state"><h3>Aucun équipement</h3><p>Commencez par ajouter votre premier équipement</p></div>';
+            } else {
+                list.innerHTML = filtered.map(eq => `
+                    <div class="equipment-item">
+                        <div class="equipment-info">
+                            <h3>${eq.name}</h3>
+                            <p>📋 ${eq.reference} • ${eq.type}</p>
+                            ${eq.assignedTo ? `<p>👤 Assigné à: ${eq.assignedTo}</p>` : ''}
+                            ${eq.notes ? `<p>📝 ${eq.notes}</p>` : ''}
+                        </div>
+                        <div class="equipment-status ${eq.status}">
+                            ${eq.status === 'disponible' ? '🟢 Disponible' : '🔴 Assigné'}
+                        </div>
+                        <div class="equipment-date">
+                            ${new Date(eq.createdAt).toLocaleDateString('fr-FR')}
+                        </div>
+                        <div class="equipment-actions">
+                            ${canEdit() ? `
+                                <button class="btn btn-warning btn-sm" onclick="openEditModal('${eq.id}')">✏️</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteEquipment('${eq.id}')">🗑️</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const total = equipments.length;
+            const available = equipments.filter(e => e.status === 'disponible').length;
+            const assigned = equipments.filter(e => e.status === 'assigne').length;
+
+            document.getElementById('totalEquipments').textContent = total;
+            document.getElementById('availableEquipments').textContent = available;
+            document.getElementById('assignedEquipments').textContent = assigned;
+        }
+
+        function canEdit() {
+            return currentUser && (currentUser.editEquipements || currentUser.role === 'admin' || currentUser.role === 'superadmin');
+        }
+
+        window.openAddModal = function() {
+            if (!canEdit()) {
+                showError('Vous n\'avez pas la permission de modifier les équipements');
+                return;
+            }
+
+            editingId = null;
+            document.getElementById('modalTitle').textContent = 'Ajouter un équipement';
+            document.getElementById('equipmentName').value = '';
+            document.getElementById('equipmentReference').value = '';
+            document.getElementById('equipmentType').value = '';
+            document.getElementById('equipmentStatus').value = 'disponible';
+            document.getElementById('assignedTo').value = '';
+            document.getElementById('equipmentNotes').value = '';
+            document.getElementById('assignedToGroup').style.display = 'none';
+            document.getElementById('equipmentModal').classList.add('show');
+        };
+
+        window.openEditModal = function(id) {
+            if (!canEdit()) {
+                showError('Vous n\'avez pas la permission de modifier les équipements');
+                return;
+            }
+
+            const equipment = equipments.find(e => e.id === id);
+            if (!equipment) return;
+
+            editingId = id;
+            document.getElementById('modalTitle').textContent = 'Modifier l\'équipement';
+            document.getElementById('equipmentName').value = equipment.name;
+            document.getElementById('equipmentReference').value = equipment.reference;
+            document.getElementById('equipmentType').value = equipment.type;
+            document.getElementById('equipmentStatus').value = equipment.status;
+            document.getElementById('assignedTo').value = equipment.assignedTo || '';
+            document.getElementById('equipmentNotes').value = equipment.notes || '';
+            document.getElementById('assignedToGroup').style.display = equipment.status === 'assigne' ? 'block' : 'none';
+            document.getElementById('equipmentModal').classList.add('show');
+        };
+
+        window.closeModal = function() {
+            document.getElementById('equipmentModal').classList.remove('show');
+            document.getElementById('modalError').style.display = 'none';
+            document.getElementById('modalSuccess').style.display = 'none';
+        };
+
+        window.saveEquipment = async function() {
+            const name = document.getElementById('equipmentName').value.trim();
+            const reference = document.getElementById('equipmentReference').value.trim();
+            const type = document.getElementById('equipmentType').value;
+            const status = document.getElementById('equipmentStatus').value;
+            const assignedTo = document.getElementById('assignedTo').value.trim();
+            const notes = document.getElementById('equipmentNotes').value.trim();
+
+            if (!name || !reference || !type) {
+                showModalError('Veuillez remplir tous les champs obligatoires');
+                return;
+            }
+
+            if (status === 'assigne' && !assignedTo) {
+                showModalError('Veuillez indiquer à qui l\'équipement est assigné');
+                return;
+            }
+
+            try {
+                const equipmentData = {
+                    name,
+                    reference,
+                    type,
+                    status,
+                    assignedTo: status === 'assigne' ? assignedTo : null,
+                    notes,
+                    modifiedAt: new Date().toISOString(),
+                    modifiedBy: currentUser.name || auth.currentUser.email
+                };
+
+                if (editingId) {
+                    await setDoc(doc(db, 'equipements', editingId), equipmentData);
+                    showModalSuccess('Équipement modifié avec succès!');
+                } else {
+                    equipmentData.createdAt = new Date().toISOString();
+                    const newDocRef = doc(collection(db, 'equipements'));
+                    await setDoc(newDocRef, equipmentData);
+                    showModalSuccess('Équipement ajouté avec succès!');
+                }
+
+                setTimeout(async () => {
+                    closeModal();
+                    await loadEquipments();
+                }, 1000);
+            } catch (error) {
+                console.error('Erreur sauvegarde:', error);
+                showModalError('Erreur lors de la sauvegarde');
+            }
+        };
+
+        window.deleteEquipment = async function(id) {
+            if (!confirm('Voulez-vous vraiment supprimer cet équipement?')) return;
+
+            try {
+                await deleteDoc(doc(db, 'equipements', id));
+                showSuccess('Équipement supprimé avec succès!');
+                await loadEquipments();
+            } catch (error) {
+                console.error('Erreur suppression:', error);
+                showError('Erreur lors de la suppression');
+            }
+        };
+
+        function showError(message) {
+            const el = document.getElementById('errorMessage');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
+
+        function showSuccess(message) {
+            const el = document.getElementById('successMessage');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
+
+        function showModalError(message) {
+            const el = document.getElementById('modalError');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
+
+        function showModalSuccess(message) {
+            const el = document.getElementById('modalSuccess');
+            el.textContent = message;
+            el.style.display = 'block';
+        }
+
+        document.getElementById('equipmentStatus').addEventListener('change', (e) => {
+            document.getElementById('assignedToGroup').style.display = e.target.value === 'assigne' ? 'block' : 'none';
+        });
+
+        document.getElementById('searchInput').addEventListener('input', renderEquipments);
+        document.getElementById('filterStatus').addEventListener('change', renderEquipments);
+
+        document.getElementById('equipmentModal').addEventListener('click', (e) => {
+            if (e.target.id === 'equipmentModal') closeModal();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nettoyage Complet - Firebase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .warning-banner {
+            background: #fff3cd;
+            border: 3px solid #ffc107;
+            color: #856404;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .warning-banner h2 {
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .warning-banner p {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .danger-zone {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 3px solid #dc3545;
+        }
+
+        .danger-zone h3 {
+            color: #dc3545;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .cleanup-option {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .cleanup-option h4 {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .cleanup-option p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            width: 100%;
+            padding: 12px;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-danger:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .confirmation {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 2px solid #ffc107;
+        }
+
+        .confirmation label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .confirmation input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .back-button {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .progress {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: #e9ecef;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🗑️ Nettoyage Complet Firebase</h1>
+        <div class="header-right">
+            <button class="btn btn-secondary" onclick="window.location.href='admin-administrator.html'">← Retour Admin Tools</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="warning-banner">
+            <h2>⚠️ ATTENTION - ZONE DANGEREUSE</h2>
+            <p>Ces opérations sont <strong>IRRÉVERSIBLES</strong> et supprimeront définitivement les données sélectionnées.</p>
+            <p>Assurez-vous d'avoir une sauvegarde avant de continuer.</p>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+
+        <div class="danger-zone">
+            <h3>Options de nettoyage</h3>
+
+            <div class="cleanup-option">
+                <h4>🗑️ Supprimer tous les casiers</h4>
+                <p>Supprime toutes les attributions de casiers. Les 288 casiers redeviendront disponibles.</p>
+                <div class="confirmation">
+                    <label>
+                        <input type="checkbox" id="confirmCasiers">
+                        Je comprends que cette action supprimera toutes les données des casiers
+                    </label>
+                </div>
+                <button class="btn btn-danger" id="btnCasiers" disabled onclick="cleanupCasiers()">
+                    Supprimer tous les casiers
+                </button>
+            </div>
+
+            <div class="cleanup-option">
+                <h4>🗑️ Supprimer tous les équipements</h4>
+                <p>Supprime tous les équipements enregistrés dans la base de données.</p>
+                <div class="confirmation">
+                    <label>
+                        <input type="checkbox" id="confirmEquipements">
+                        Je comprends que cette action supprimera tous les équipements
+                    </label>
+                </div>
+                <button class="btn btn-danger" id="btnEquipements" disabled onclick="cleanupEquipements()">
+                    Supprimer tous les équipements
+                </button>
+            </div>
+
+            <div class="cleanup-option">
+                <h4>🗑️ Supprimer tous les utilisateurs (sauf admin)</h4>
+                <p>Supprime tous les utilisateurs sauf le compte administrateur principal.</p>
+                <div class="confirmation">
+                    <label>
+                        <input type="checkbox" id="confirmUsers">
+                        Je comprends que cette action supprimera tous les utilisateurs sauf l'admin
+                    </label>
+                </div>
+                <button class="btn btn-danger" id="btnUsers" disabled onclick="cleanupUsers()">
+                    Supprimer tous les utilisateurs
+                </button>
+            </div>
+
+            <div class="cleanup-option">
+                <h4>💣 NETTOYAGE COMPLET</h4>
+                <p><strong>DANGER MAXIMUM:</strong> Supprime TOUTES les données (casiers, équipements, utilisateurs sauf admin).</p>
+                <div class="confirmation">
+                    <label>
+                        <input type="checkbox" id="confirmAll">
+                        Je comprends les conséquences et je veux TOUT supprimer
+                    </label>
+                </div>
+                <button class="btn btn-danger" id="btnAll" disabled onclick="cleanupAll()">
+                    ⚠️ TOUT SUPPRIMER
+                </button>
+            </div>
+
+            <div id="progress" class="progress">
+                <div class="spinner"></div>
+                <div class="progress-text" id="progressText">Traitement en cours...</div>
+            </div>
+        </div>
+
+        <div class="back-button">
+            <button class="btn btn-secondary" onclick="window.location.href='admin-administrator.html'">
+                ← Retour aux Admin Tools
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMPBik5vpX8qOYWuhPzpJZoOLjE20pl6g",
+            authDomain: "gestion-epi-4387a.firebaseapp.com",
+            projectId: "gestion-epi-4387a",
+            storageBucket: "gestion-epi-4387a.firebasestorage.app",
+            messagingSenderId: "974706767408",
+            appId: "1:974706767408:web:fde01e52a3a986d6da9ff5",
+            measurementId: "G-PKNXH32P0Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (!userDoc.exists() || !userDoc.data().active) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                currentUser = { uid: user.uid, ...userDoc.data() };
+
+                if (currentUser.role !== 'admin' && currentUser.role !== 'superadmin') {
+                    showError('Accès non autorisé');
+                    setTimeout(() => window.location.href = 'gestion-casiers.html', 2000);
+                    return;
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError('Erreur de chargement');
+            }
+        });
+
+        document.getElementById('confirmCasiers').addEventListener('change', (e) => {
+            document.getElementById('btnCasiers').disabled = !e.target.checked;
+        });
+
+        document.getElementById('confirmEquipements').addEventListener('change', (e) => {
+            document.getElementById('btnEquipements').disabled = !e.target.checked;
+        });
+
+        document.getElementById('confirmUsers').addEventListener('change', (e) => {
+            document.getElementById('btnUsers').disabled = !e.target.checked;
+        });
+
+        document.getElementById('confirmAll').addEventListener('change', (e) => {
+            document.getElementById('btnAll').disabled = !e.target.checked;
+        });
+
+        window.cleanupCasiers = async function() {
+            if (!confirm('DERNIÈRE CONFIRMATION: Voulez-vous vraiment supprimer TOUS les casiers?')) return;
+
+            showProgress('Suppression des casiers...');
+            try {
+                await setDoc(doc(db, 'casiers', 'data'), {});
+                showSuccess('✅ Tous les casiers ont été supprimés avec succès');
+                document.getElementById('confirmCasiers').checked = false;
+                document.getElementById('btnCasiers').disabled = true;
+            } catch (error) {
+                showError('Erreur: ' + error.message);
+            } finally {
+                hideProgress();
+            }
+        };
+
+        window.cleanupEquipements = async function() {
+            if (!confirm('DERNIÈRE CONFIRMATION: Voulez-vous vraiment supprimer TOUS les équipements?')) return;
+
+            showProgress('Suppression des équipements...');
+            try {
+                const snapshot = await getDocs(collection(db, 'equipements'));
+                let deleted = 0;
+                for (const docSnap of snapshot.docs) {
+                    await deleteDoc(doc(db, 'equipements', docSnap.id));
+                    deleted++;
+                    updateProgress(`Suppression en cours... ${deleted}/${snapshot.size}`);
+                }
+                showSuccess(`✅ ${deleted} équipements supprimés avec succès`);
+                document.getElementById('confirmEquipements').checked = false;
+                document.getElementById('btnEquipements').disabled = true;
+            } catch (error) {
+                showError('Erreur: ' + error.message);
+            } finally {
+                hideProgress();
+            }
+        };
+
+        window.cleanupUsers = async function() {
+            if (!confirm('DERNIÈRE CONFIRMATION: Voulez-vous vraiment supprimer TOUS les utilisateurs (sauf admin)?')) return;
+
+            showProgress('Suppression des utilisateurs...');
+            try {
+                const snapshot = await getDocs(collection(db, 'users'));
+                let deleted = 0;
+                for (const docSnap of snapshot.docs) {
+                    const userData = docSnap.data();
+                    if (userData.role !== 'admin' && userData.role !== 'superadmin') {
+                        await deleteDoc(doc(db, 'users', docSnap.id));
+                        deleted++;
+                        updateProgress(`Suppression en cours... ${deleted} utilisateurs`);
+                    }
+                }
+                showSuccess(`✅ ${deleted} utilisateurs supprimés avec succès`);
+                document.getElementById('confirmUsers').checked = false;
+                document.getElementById('btnUsers').disabled = true;
+            } catch (error) {
+                showError('Erreur: ' + error.message);
+            } finally {
+                hideProgress();
+            }
+        };
+
+        window.cleanupAll = async function() {
+            const confirmation = prompt('DANGER MAXIMUM! Tapez "SUPPRIMER TOUT" pour confirmer:');
+            if (confirmation !== 'SUPPRIMER TOUT') {
+                showError('Confirmation incorrecte. Opération annulée.');
+                return;
+            }
+
+            showProgress('Nettoyage complet en cours...');
+            try {
+                updateProgress('Suppression des casiers...');
+                await setDoc(doc(db, 'casiers', 'data'), {});
+
+                updateProgress('Suppression des équipements...');
+                const equipSnapshot = await getDocs(collection(db, 'equipements'));
+                for (const docSnap of equipSnapshot.docs) {
+                    await deleteDoc(doc(db, 'equipements', docSnap.id));
+                }
+
+                updateProgress('Suppression des utilisateurs...');
+                const userSnapshot = await getDocs(collection(db, 'users'));
+                let deletedUsers = 0;
+                for (const docSnap of userSnapshot.docs) {
+                    const userData = docSnap.data();
+                    if (userData.role !== 'admin' && userData.role !== 'superadmin') {
+                        await deleteDoc(doc(db, 'users', docSnap.id));
+                        deletedUsers++;
+                    }
+                }
+
+                showSuccess(`✅ Nettoyage complet terminé! ${equipSnapshot.size} équipements et ${deletedUsers} utilisateurs supprimés.`);
+                document.getElementById('confirmAll').checked = false;
+                document.getElementById('btnAll').disabled = true;
+            } catch (error) {
+                showError('Erreur: ' + error.message);
+            } finally {
+                hideProgress();
+            }
+        };
+
+        function showProgress(text) {
+            document.getElementById('progress').style.display = 'block';
+            document.getElementById('progressText').textContent = text;
+        }
+
+        function updateProgress(text) {
+            document.getElementById('progressText').textContent = text;
+        }
+
+        function hideProgress() {
+            document.getElementById('progress').style.display = 'none';
+        }
+
+        function showError(message) {
+            const el = document.getElementById('errorMessage');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
+
+        function showSuccess(message) {
+            const el = document.getElementById('successMessage');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 8000);
+        }
+    </script>
+</body>
+</html>

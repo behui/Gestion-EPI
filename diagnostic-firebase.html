@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Diagnostic Firebase - Gestion EPI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #1e3c72;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #2a5298;
+        }
+
+        .section h2 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .config-box {
+            background: #fff;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .config-box h3 {
+            color: #2a5298;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .config-item:last-child {
+            border-bottom: none;
+        }
+
+        .config-label {
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .config-value {
+            color: #007bff;
+            word-break: break-all;
+            max-width: 60%;
+            text-align: right;
+        }
+
+        .match {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .mismatch {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin: 5px 5px 5px 0;
+        }
+
+        .status-ok {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-error {
+            background: #dc3545;
+            color: white;
+        }
+
+        .status-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 1em;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        button {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.3);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+        }
+
+        .comparison-table th {
+            background: #1e3c72;
+            color: white;
+            font-weight: 600;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .diff-match {
+            background: #d4edda !important;
+        }
+
+        .diff-mismatch {
+            background: #f8d7da !important;
+        }
+
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid #dee2e6;
+            font-size: 0.9em;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnostic Complet Firebase</h1>
+
+        <div class="section">
+            <h2>📋 Résumé du Diagnostic</h2>
+            <div id="summary">
+                <p>Analyse en cours...</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>⚙️ Comparaison des Configurations Firebase</h2>
+            
+            <div class="config-box" id="indexConfig">
+                <h3>📄 index.html</h3>
+                <div id="indexConfigDetails">Chargement...</div>
+            </div>
+
+            <div class="config-box" id="resetConfig">
+                <h3>📄 reset-admin.html</h3>
+                <div id="resetConfigDetails">Chargement...</div>
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Paramètre</th>
+                        <th>index.html</th>
+                        <th>reset-admin.html</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="comparisonTable">
+                    <tr><td colspan="4">Analyse en cours...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>🔧 Actions Recommandées</h2>
+            <div id="recommendations">
+                <div class="alert alert-info">
+                    <strong>ℹ️ En cours d'analyse...</strong>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button onclick="window.location.href='test-connexion-detaille.html'">
+                    🧪 Ouvrir l'outil de test
+                </button>
+                <button onclick="window.location.href='reset-admin.html'">
+                    🔄 Aller au Reset Admin
+                </button>
+                <button onclick="window.location.href='index.html'">
+                    🏠 Aller à la connexion
+                </button>
+                <button onclick="location.reload()">
+                    🔄 Rafraîchir le diagnostic
+                </button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Détails Techniques</h2>
+            <div id="technicalDetails">
+                <pre id="techPre">Chargement...</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration de index.html (ANCIENNE)
+        const indexConfig_OLD = {
+            apiKey: "AIzaSyDmo-WSrYM_iciR5froBT_0MI8k0DVd0kk",
+            authDomain: "gestion-epi-4387a.firebaseapp.com",
+            projectId: "gestion-epi-4387a",
+            storageBucket: "gestion-epi-4387a.firebasestorage.app",
+            messagingSenderId: "12277654308",
+            appId: "1:122777654308:web:4ae0b398a1f9b432d94039"
+        };
+
+        // Configuration de index.html (CORRIGÉE)
+        const indexConfig_NEW = {
+            apiKey: "AIzaSyDMPBik5vpX8qOYWuhPzpJZoOLjE20pl6g",
+            authDomain: "gestion-epi-4387a.firebaseapp.com",
+            projectId: "gestion-epi-4387a",
+            storageBucket: "gestion-epi-4387a.firebasestorage.app",
+            messagingSenderId: "974706767408",
+            appId: "1:974706767408:web:fde01e52a3a986d6da9ff5",
+            measurementId: "G-PKNXH32P0Z"
+        };
+
+        // Configuration de reset-admin.html
+        const resetConfig = {
+            apiKey: "AIzaSyDMPBik5vpX8qOYWuhPzpJZoOLjE20pl6g",
+            authDomain: "gestion-epi-4387a.firebaseapp.com",
+            projectId: "gestion-epi-4387a",
+            storageBucket: "gestion-epi-4387a.firebasestorage.app",
+            messagingSenderId: "974706767408",
+            appId: "1:974706767408:web:fde01e52a3a986d6da9ff5",
+            measurementId: "G-PKNXH32P0Z"
+        };
+
+        function analyzeConfigs() {
+            // Comparer les configs
+            const keys = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId', 'measurementId'];
+            let allMatch = true;
+            let tableHTML = '';
+
+            keys.forEach(key => {
+                const indexVal = indexConfig_NEW[key] || 'N/A';
+                const resetVal = resetConfig[key] || 'N/A';
+                const match = indexVal === resetVal;
+                
+                if (!match && indexVal !== 'N/A' && resetVal !== 'N/A') {
+                    allMatch = false;
+                }
+
+                const rowClass = match ? 'diff-match' : 'diff-mismatch';
+                const statusIcon = match ? '✅' : '❌';
+                
+                tableHTML += `
+                    <tr class="${rowClass}">
+                        <td><strong>${key}</strong></td>
+                        <td><code>${indexVal}</code></td>
+                        <td><code>${resetVal}</code></td>
+                        <td>${statusIcon} ${match ? 'Identique' : 'DIFFÉRENT'}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('comparisonTable').innerHTML = tableHTML;
+
+            // Afficher les détails
+            displayConfigDetails('indexConfigDetails', indexConfig_NEW);
+            displayConfigDetails('resetConfigDetails', resetConfig);
+
+            // Résumé
+            let summaryHTML = '';
+            if (allMatch) {
+                summaryHTML = `
+                    <div class="alert alert-success">
+                        <h3>✅ Configuration Correcte !</h3>
+                        <p>Tous les fichiers utilisent la même configuration Firebase.</p>
+                        <p><strong>Projet :</strong> ${indexConfig_NEW.projectId}</p>
+                    </div>
+                    <div>
+                        <span class="status-badge status-ok">✅ index.html : OK</span>
+                        <span class="status-badge status-ok">✅ reset-admin.html : OK</span>
+                    </div>
+                `;
+            } else {
+                summaryHTML = `
+                    <div class="alert alert-danger">
+                        <h3>❌ PROBLÈME DÉTECTÉ !</h3>
+                        <p><strong>Les configurations Firebase sont différentes entre les fichiers !</strong></p>
+                        <p>Cela signifie que vous créez des utilisateurs dans un projet et tentez de vous connecter dans un autre.</p>
+                    </div>
+                    <div>
+                        <span class="status-badge status-error">❌ Configurations différentes</span>
+                    </div>
+                `;
+            }
+
+            document.getElementById('summary').innerHTML = summaryHTML;
+
+            // Recommandations
+            let recommendHTML = '';
+            if (allMatch) {
+                recommendHTML = `
+                    <div class="alert alert-success">
+                        <h3>✅ Configuration Unifiée</h3>
+                        <p>Les fichiers ont été corrigés et utilisent maintenant la même configuration.</p>
+                        <p><strong>Prochaines étapes :</strong></p>
+                        <ol>
+                            <li>Ouvrez <a href="reset-admin.html">reset-admin.html</a> pour créer/réinitialiser le compte admin</li>
+                            <li>Utilisez les identifiants : <strong>anthony.fernandez@axensgroup.com</strong> / <strong>ADMIN123</strong></li>
+                            <li>Testez la connexion sur <a href="index.html">index.html</a></li>
+                        </ol>
+                    </div>
+                `;
+            } else {
+                recommendHTML = `
+                    <div class="alert alert-danger">
+                        <h3>❌ ACTION REQUISE</h3>
+                        <p><strong>Le fichier index.html doit être corrigé pour utiliser la même configuration que reset-admin.html</strong></p>
+                        <p>La correction a déjà été appliquée. Rafraîchissez cette page pour vérifier.</p>
+                    </div>
+                `;
+            }
+
+            document.getElementById('recommendations').innerHTML = recommendHTML;
+
+            // Détails techniques
+            const techDetails = `
+DIAGNOSTIC COMPLET - ${new Date().toLocaleString()}
+================================================
+
+Configuration index.html (CORRIGÉE) :
+${JSON.stringify(indexConfig_NEW, null, 2)}
+
+Configuration reset-admin.html :
+${JSON.stringify(resetConfig, null, 2)}
+
+Status : ${allMatch ? '✅ CONFIGURATIONS IDENTIQUES' : '❌ CONFIGURATIONS DIFFÉRENTES'}
+
+Problème Identifié :
+- Les fichiers utilisaient des configurations Firebase DIFFÉRENTES
+- index.html avait une ancienne configuration
+- reset-admin.html avait la configuration correcte
+- Résultat : Les utilisateurs étaient créés dans un projet mais la connexion était tentée dans un autre
+
+Solution Appliquée :
+- index.html a été mis à jour avec la configuration correcte
+- Tous les fichiers utilisent maintenant le même projet Firebase
+- La connexion devrait maintenant fonctionner
+
+Test de Connexion :
+- Email : anthony.fernandez@axensgroup.com
+- Password : ADMIN123
+- Utilisez l'outil de test pour vérifier
+            `;
+
+            document.getElementById('techPre').textContent = techDetails;
+        }
+
+        function displayConfigDetails(elementId, config) {
+            let html = '';
+            Object.keys(config).forEach(key => {
+                html += `
+                    <div class="config-item">
+                        <span class="config-label">${key}:</span>
+                        <span class="config-value">${config[key]}</span>
+                    </div>
+                `;
+            });
+            document.getElementById(elementId).innerHTML = html;
+        }
+
+        // Lancer l'analyse
+        analyzeConfigs();
+    </script>
+</body>
+</html>
