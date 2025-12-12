@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔐 Connexion - Gestion Casiers PPVE</title>
+    <title>Connexion - Gestion EPI</title>
     <style>
         * {
             margin: 0;
@@ -16,25 +16,25 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             padding: 20px;
         }
 
         .login-container {
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 40px;
-            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
             max-width: 400px;
+            width: 100%;
             animation: slideIn 0.5s ease;
         }
 
         @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(-30px);
+                transform: translateY(-50px);
             }
             to {
                 opacity: 1;
@@ -42,24 +42,29 @@
             }
         }
 
-        .logo {
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
             text-align: center;
-            margin-bottom: 30px;
         }
 
-        .logo h1 {
-            font-size: 2.5em;
+        .login-header h1 {
+            font-size: 28px;
             margin-bottom: 10px;
-            color: #667eea;
         }
 
-        .logo p {
-            color: #666;
-            font-size: 0.95em;
+        .login-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .login-body {
+            padding: 40px 30px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .form-group label {
@@ -67,16 +72,16 @@
             margin-bottom: 8px;
             color: #333;
             font-weight: 500;
-            font-size: 0.95em;
+            font-size: 14px;
         }
 
         .form-group input {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1em;
-            transition: all 0.3s;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
         }
 
         .form-group input:focus {
@@ -91,17 +96,16 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 10px;
+            transition: all 0.3s ease;
         }
 
         .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
 
         .btn-login:active {
@@ -114,29 +118,20 @@
             transform: none;
         }
 
-        .alert {
-            padding: 12px 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 0.9em;
-            display: none;
-        }
-
-        .alert-error {
+        .error-message {
             background: #fee;
             color: #c33;
-            border: 1px solid #fcc;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+            border-left: 4px solid #c33;
         }
 
-        .alert-success {
-            background: #efe;
-            color: #3c3;
-            border: 1px solid #cfc;
-        }
-
-        .alert.show {
+        .error-message.show {
             display: block;
-            animation: shake 0.5s;
+            animation: shake 0.5s ease;
         }
 
         @keyframes shake {
@@ -145,205 +140,201 @@
             75% { transform: translateX(10px); }
         }
 
-        .loading {
-            display: none;
+        .forgot-password {
             text-align: center;
             margin-top: 20px;
         }
 
-        .loading.show {
-            display: block;
+        .forgot-password a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
         }
 
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+        .forgot-password a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
             margin: 0 auto;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
 
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #999;
-            font-size: 0.85em;
+        .btn-login.loading .btn-text {
+            display: none;
+        }
+
+        .btn-login.loading .loading-spinner {
+            display: block;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <div class="logo">
-            <h1>🔐</h1>
-            <p>Gestion Casiers PPVE</p>
+        <div class="login-header">
+            <h1>🛡️ Gestion EPI</h1>
+            <p>Système de gestion des équipements</p>
         </div>
-
-        <div id="alert" class="alert"></div>
-
-        <form id="login-form">
-            <div class="form-group">
-                <label for="email">📧 Adresse email</label>
-                <input type="email" id="email" placeholder="votre.email@exemple.com" required>
+        <div class="login-body">
+            <div id="errorMessage" class="error-message"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn-login" id="loginBtn">
+                    <span class="btn-text">Se connecter</span>
+                    <div class="loading-spinner"></div>
+                </button>
+            </form>
+            <div class="forgot-password">
+                <a href="#" id="forgotPassword">Mot de passe oublié ?</a>
             </div>
-
-            <div class="form-group">
-                <label for="password">🔑 Mot de passe</label>
-                <input type="password" id="password" placeholder="••••••••" required>
-            </div>
-
-            <button type="submit" class="btn-login" id="login-btn">
-                Se connecter
-            </button>
-        </form>
-
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p style="margin-top: 10px; color: #667eea;">Connexion en cours...</p>
-        </div>
-
-        <div class="footer">
-            🔒 Connexion sécurisée Firebase
         </div>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
-            apiKey: "AIzaSyDMPBik5vpX8qOYWuhPzpJZoOLjE20pl6g",
+            apiKey: "AIzaSyDmo-WSrYM_iciR5froBT_0MI8k0DVd0kk",
             authDomain: "gestion-epi-4387a.firebaseapp.com",
             projectId: "gestion-epi-4387a",
             storageBucket: "gestion-epi-4387a.firebasestorage.app",
-            messagingSenderId: "974706767408",
-            appId: "1:974706767408:web:fde01e52a3a986d6da9ff5",
-            measurementId: "G-PKNXH32P0Z"
+            messagingSenderId: "12277654308",
+            appId: "1:122777654308:web:4ae0b398a1f9b432d94039"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const loginForm = document.getElementById('login-form');
-        const loginBtn = document.getElementById('login-btn');
-        const loading = document.getElementById('loading');
-        const alertBox = document.getElementById('alert');
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const forgotPasswordLink = document.getElementById('forgotPassword');
 
-        // Vérifier si l'utilisateur est déjà connecté
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                console.log('Utilisateur déjà connecté:', user.email);
-                // Vérifier le rôle et rediriger
-                await checkRoleAndRedirect(user);
-            }
-        });
-
-        function showAlert(message, type = 'error') {
-            alertBox.textContent = message;
-            alertBox.className = `alert alert-${type} show`;
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
             setTimeout(() => {
-                alertBox.classList.remove('show');
+                errorMessage.classList.remove('show');
             }, 5000);
         }
 
-        async function checkRoleAndRedirect(user) {
-            try {
-                const userDoc = await getDoc(doc(db, 'users', user.uid));
-                
-                if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    console.log('Rôle utilisateur:', userData.role);
-                    
-                    // Sauvegarder les infos en session
-                    sessionStorage.setItem('userEmail', user.email);
-                    sessionStorage.setItem('userRole', userData.role);
-                    sessionStorage.setItem('userName', userData.nom || '');
-                    sessionStorage.setItem('userPrenom', userData.prenom || '');
-                    
-                    // Redirection
-                    window.location.href = 'gestion-casiers.html';
-                } else {
-                    // Utilisateur Firebase sans profil Firestore
-                    showAlert('❌ Compte non configuré. Contactez un administrateur.', 'error');
-                    await auth.signOut();
-                }
-            } catch (error) {
-                console.error('Erreur vérification rôle:', error);
-                showAlert('❌ Erreur lors de la vérification du compte.', 'error');
+        function setLoading(isLoading) {
+            if (isLoading) {
+                loginBtn.classList.add('loading');
+                loginBtn.disabled = true;
+            } else {
+                loginBtn.classList.remove('loading');
+                loginBtn.disabled = false;
             }
         }
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const email = document.getElementById('email').value.trim();
+            const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            if (!email || !password) {
-                showAlert('⚠️ Veuillez remplir tous les champs.', 'error');
-                return;
-            }
-
-            // Afficher le chargement
-            loginBtn.disabled = true;
-            loginBtn.textContent = 'Connexion...';
-            loading.classList.add('show');
-            alertBox.classList.remove('show');
+            setLoading(true);
 
             try {
-                // Connexion Firebase Authentication
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
+
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
                 
-                console.log('Connexion réussie:', user.email);
-                showAlert('✅ Connexion réussie ! Redirection...', 'success');
+                if (!userDoc.exists()) {
+                    throw new Error('Profil utilisateur non trouvé');
+                }
+
+                const userData = userDoc.data();
                 
-                // Vérifier le rôle et rediriger
-                await checkRoleAndRedirect(user);
-                
+                if (!userData.active) {
+                    await auth.signOut();
+                    showError('Votre compte a été désactivé. Contactez un administrateur.');
+                    setLoading(false);
+                    return;
+                }
+
+                localStorage.setItem('currentUser', JSON.stringify({
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: userData.displayName || user.email,
+                    role: userData.role || 'user',
+                    permissions: userData.permissions || {}
+                }));
+
+                window.location.href = 'gestion-casiers.html';
             } catch (error) {
-                console.error('Erreur connexion:', error);
-                
-                let errorMessage = '❌ Erreur de connexion.';
+                console.error('Erreur de connexion:', error);
+                let message = 'Erreur de connexion. Veuillez réessayer.';
                 
                 switch (error.code) {
                     case 'auth/invalid-email':
-                        errorMessage = '❌ Format d\'email invalide.';
+                        message = 'Adresse email invalide.';
                         break;
                     case 'auth/user-disabled':
-                        errorMessage = '❌ Ce compte a été désactivé.';
+                        message = 'Ce compte a été désactivé.';
                         break;
                     case 'auth/user-not-found':
-                        errorMessage = '❌ Aucun compte trouvé avec cet email.';
+                        message = 'Aucun compte ne correspond à cet email.';
                         break;
                     case 'auth/wrong-password':
-                        errorMessage = '❌ Mot de passe incorrect.';
+                        message = 'Mot de passe incorrect.';
                         break;
                     case 'auth/invalid-credential':
-                        errorMessage = '❌ Email ou mot de passe incorrect.';
+                        message = 'Email ou mot de passe incorrect.';
                         break;
                     case 'auth/too-many-requests':
-                        errorMessage = '❌ Trop de tentatives. Réessayez plus tard.';
+                        message = 'Trop de tentatives. Réessayez plus tard.';
                         break;
-                    default:
-                        errorMessage = `❌ ${error.message}`;
                 }
                 
-                showAlert(errorMessage, 'error');
-                
-            } finally {
-                loginBtn.disabled = false;
-                loginBtn.textContent = 'Se connecter';
-                loading.classList.remove('show');
+                showError(message);
+                setLoading(false);
+            }
+        });
+
+        forgotPasswordLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            
+            if (!email) {
+                showError('Veuillez entrer votre adresse email.');
+                return;
+            }
+
+            try {
+                await sendPasswordResetEmail(auth, email);
+                showError('Email de réinitialisation envoyé ! Vérifiez votre boîte de réception.');
+                errorMessage.style.background = '#e8f5e9';
+                errorMessage.style.color = '#2e7d32';
+                errorMessage.style.borderLeftColor = '#2e7d32';
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError('Erreur lors de l\'envoi de l\'email de réinitialisation.');
             }
         });
     </script>

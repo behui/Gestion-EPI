@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧹 Nettoyage Firebase - Gestion EPI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            color: #856404;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+        }
+
+        .warning h3 {
+            margin-bottom: 10px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #f57c00;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .log {
+            background: #263238;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+        }
+
+        .log-error {
+            color: #ff5252;
+        }
+
+        .log-success {
+            color: #69f0ae;
+        }
+
+        .log-info {
+            color: #40c4ff;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .back-link {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧹 Nettoyage Firebase</h1>
+            <p>Outils de maintenance et nettoyage de la base de données</p>
+        </div>
+
+        <div class="warning">
+            <h3>⚠️ ATTENTION</h3>
+            <p>Ces opérations sont irréversibles et peuvent supprimer des données importantes. Utilisez uniquement si vous êtes certain de ce que vous faites.</p>
+        </div>
+
+        <div class="content">
+            <!-- Section: Nettoyage Casiers -->
+            <div class="section">
+                <h2>🔒 Nettoyage des Casiers</h2>
+                <p>Supprime tous les casiers et réinitialise la base de données des casiers.</p>
+                <div class="btn-group">
+                    <button class="btn btn-danger" onclick="cleanLockers()">Supprimer tous les casiers</button>
+                    <button class="btn btn-warning" onclick="cleanEmptyLockers()">Supprimer casiers vides uniquement</button>
+                </div>
+            </div>
+
+            <!-- Section: Nettoyage Équipements -->
+            <div class="section">
+                <h2>🎯 Nettoyage des Équipements</h2>
+                <p>Supprime tous les équipements de la base de données.</p>
+                <div class="btn-group">
+                    <button class="btn btn-danger" onclick="cleanEquipments()">Supprimer tous les équipements</button>
+                </div>
+            </div>
+
+            <!-- Section: Statistiques -->
+            <div class="section">
+                <h2>📊 Statistiques</h2>
+                <button class="btn btn-success" onclick="loadStats()">Actualiser les statistiques</button>
+                <div class="stats" id="statsContainer">
+                    <div class="stat-card">
+                        <div class="stat-value" id="lockersCount">-</div>
+                        <div class="stat-label">Casiers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="equipmentsCount">-</div>
+                        <div class="stat-label">Équipements</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="usersCount">-</div>
+                        <div class="stat-label">Utilisateurs</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Logs -->
+            <div class="section">
+                <h2>📝 Journal des opérations</h2>
+                <div class="log" id="logContainer">
+                    <div class="log-entry log-info">En attente d'opération...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="back-link">
+            <a href="admin-administrator.html">← Retour au panneau administrateur</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, getDocs, deleteDoc, doc, query, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDmo-WSrYM_iciR5froBT_0MI8k0DVd0kk",
+            authDomain: "gestion-epi-4387a.firebaseapp.com",
+            projectId: "gestion-epi-4387a",
+            storageBucket: "gestion-epi-4387a.firebasestorage.app",
+            messagingSenderId: "122777654308",
+            appId: "1:122777654308:web:4ae0b398a1f9b432d94039"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        window.cleanLockers = async function() {
+            if (!confirm('⚠️ ATTENTION: Cette action supprimera TOUS les casiers de la base de données. Êtes-vous sûr ?')) {
+                return;
+            }
+
+            if (!confirm('Dernière confirmation: Voulez-vous vraiment supprimer TOUS les casiers ?')) {
+                return;
+            }
+
+            addLog('🔄 Début de la suppression des casiers...', 'info');
+
+            try {
+                const lockersSnapshot = await getDocs(collection(db, 'lockers'));
+                let deletedCount = 0;
+
+                for (const lockerDoc of lockersSnapshot.docs) {
+                    await deleteDoc(doc(db, 'lockers', lockerDoc.id));
+                    deletedCount++;
+                    addLog(`✓ Casier ${lockerDoc.id} supprimé`, 'success');
+                }
+
+                addLog(`✅ Suppression terminée: ${deletedCount} casier(s) supprimé(s)`, 'success');
+                loadStats();
+            } catch (error) {
+                console.error('Erreur:', error);
+                addLog(`❌ Erreur: ${error.message}`, 'error');
+            }
+        };
+
+        window.cleanEmptyLockers = async function() {
+            if (!confirm('Supprimer tous les casiers vides ?')) {
+                return;
+            }
+
+            addLog('🔄 Recherche des casiers vides...', 'info');
+
+            try {
+                const lockersSnapshot = await getDocs(collection(db, 'lockers'));
+                let deletedCount = 0;
+
+                for (const lockerDoc of lockersSnapshot.docs) {
+                    const data = lockerDoc.data();
+                    if (!data.occupant || data.occupant.trim() === '') {
+                        await deleteDoc(doc(db, 'lockers', lockerDoc.id));
+                        deletedCount++;
+                        addLog(`✓ Casier vide ${lockerDoc.id} supprimé`, 'success');
+                    }
+                }
+
+                addLog(`✅ Suppression terminée: ${deletedCount} casier(s) vide(s) supprimé(s)`, 'success');
+                loadStats();
+            } catch (error) {
+                console.error('Erreur:', error);
+                addLog(`❌ Erreur: ${error.message}`, 'error');
+            }
+        };
+
+        window.cleanEquipments = async function() {
+            if (!confirm('⚠️ ATTENTION: Cette action supprimera TOUS les équipements de la base de données. Êtes-vous sûr ?')) {
+                return;
+            }
+
+            if (!confirm('Dernière confirmation: Voulez-vous vraiment supprimer TOUS les équipements ?')) {
+                return;
+            }
+
+            addLog('🔄 Début de la suppression des équipements...', 'info');
+
+            try {
+                const equipmentsSnapshot = await getDocs(collection(db, 'equipments'));
+                let deletedCount = 0;
+
+                for (const equipmentDoc of equipmentsSnapshot.docs) {
+                    await deleteDoc(doc(db, 'equipments', equipmentDoc.id));
+                    deletedCount++;
+                    addLog(`✓ Équipement ${equipmentDoc.id} supprimé`, 'success');
+                }
+
+                addLog(`✅ Suppression terminée: ${deletedCount} équipement(s) supprimé(s)`, 'success');
+                loadStats();
+            } catch (error) {
+                console.error('Erreur:', error);
+                addLog(`❌ Erreur: ${error.message}`, 'error');
+            }
+        };
+
+        window.loadStats = async function() {
+            addLog('🔄 Chargement des statistiques...', 'info');
+
+            try {
+                const lockersSnapshot = await getDocs(collection(db, 'lockers'));
+                document.getElementById('lockersCount').textContent = lockersSnapshot.size;
+
+                const equipmentsSnapshot = await getDocs(collection(db, 'equipments'));
+                document.getElementById('equipmentsCount').textContent = equipmentsSnapshot.size;
+
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                document.getElementById('usersCount').textContent = usersSnapshot.size;
+
+                addLog('✅ Statistiques chargées', 'success');
+            } catch (error) {
+                console.error('Erreur:', error);
+                addLog(`❌ Erreur lors du chargement des statistiques: ${error.message}`, 'error');
+            }
+        };
+
+        // Charger les stats au démarrage
+        loadStats();
+    </script>
+</body>
+</html>
