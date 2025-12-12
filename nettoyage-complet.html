@@ -402,27 +402,30 @@ exports.deleteAuthUserOnFirestoreDelete = functions.firestore
             
             // Vérifier le rôle admin
             try {
-                const userDoc = await getDoc(doc(db, 'users', user.email));
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
                 if (!userDoc.exists()) {
+                    console.error('⛔ Profil introuvable pour UID:', user.uid, 'Email:', user.email);
                     alert('⛔ Accès refusé : Profil utilisateur introuvable');
                     window.location.href = 'gestion-casiers.html';
                     return;
                 }
                 
                 const userData = userDoc.data();
+                console.log('📋 Profil chargé:', userData);
+                
                 if (userData.role !== 'admin') {
                     alert('⛔ Accès refusé : Cet outil est réservé aux administrateurs');
                     window.location.href = 'gestion-casiers.html';
                     return;
                 }
                 
-                // Admin vérifié
+                // Admin vérifié - Accès autorisé
                 console.log('✅ Administrateur vérifié:', user.email);
                 document.getElementById('currentUser').textContent = user.email + ' (ADMIN)';
                 
             } catch (error) {
-                console.error('Erreur vérification admin:', error);
-                alert('⛔ Erreur de vérification des permissions');
+                console.error('❌ Erreur vérification admin:', error);
+                alert('⛔ Erreur de vérification des permissions: ' + error.message);
                 window.location.href = 'gestion-casiers.html';
             }
         });
