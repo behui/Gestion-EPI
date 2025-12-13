@@ -92,7 +92,7 @@
 
             try {
                 // Charger le profil utilisateur
-                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                const userDoc = await getDoc(doc(db, 'users', user.email));
                 
                 if (!userDoc.exists()) {
                     alert(MESSAGES.ERROR.PROFILE_NOT_FOUND);
