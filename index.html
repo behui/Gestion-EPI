@@ -527,25 +527,25 @@
                         errorMessage = MESSAGES.ERROR.INVALID_EMAIL;
                         break;
                     case 'auth/user-disabled':
-                        errorMessage = '❌ Ce compte a été désactivé.';
+                        errorMessage = '❌ Ce compte a été désactivé. Contactez un administrateur.';
                         break;
                     case 'auth/user-not-found':
-                        errorMessage = MESSAGES.ERROR.LOGIN_FAILED;
+                        errorMessage = '❌ Aucun compte trouvé avec cet email.\n\n💡 Solutions :\n• Vérifiez l\'orthographe de l\'email\n• Contactez un administrateur pour créer votre compte';
                         break;
                     case 'auth/wrong-password':
-                        errorMessage = MESSAGES.ERROR.LOGIN_FAILED;
+                        errorMessage = '❌ Mot de passe incorrect.\n\n💡 Solutions :\n• Vérifiez votre mot de passe\n• Contactez un administrateur pour le réinitialiser';
                         break;
                     case 'auth/invalid-credential':
-                        errorMessage = MESSAGES.ERROR.LOGIN_FAILED;
+                        errorMessage = '❌ Identifiants invalides.\n\n💡 Solutions :\n• Vérifiez votre email ET mot de passe\n• Le compte n\'existe peut-être pas - contactez un administrateur\n• Essayez de réinitialiser le mot de passe dans Firebase Console';
                         break;
                     case 'auth/network-request-failed':
-                        errorMessage = '❌ Erreur réseau. Vérifiez votre connexion internet ou réessayez dans quelques instants.';
+                        errorMessage = '❌ Erreur réseau.\n\n💡 Solutions :\n• Vérifiez votre connexion internet\n• Réessayez dans quelques instants\n• Videz le cache du navigateur (CTRL+F5)';
                         break;
                     case 'auth/too-many-requests':
-                        errorMessage = '❌ Trop de tentatives. Réessayez plus tard.';
+                        errorMessage = '❌ Trop de tentatives échouées.\n\n💡 Solutions :\n• Attendez 15 minutes avant de réessayer\n• Réinitialisez le mot de passe dans Firebase Console';
                         break;
                     default:
-                        errorMessage = `❌ ${error.message}`;
+                        errorMessage = `❌ Erreur de connexion.\n\nCode: ${error.code}\nMessage: ${error.message}\n\n💡 Contactez un administrateur avec ce code d\'erreur.`;
                 }
                 
                 showAlert(errorMessage, 'error');
