@@ -352,9 +352,11 @@
             }
         };
         
-        // 🔒 Firebase App Check - Protection anti-bot et abus (MODE DEBUG)
-        // Note: App Check peut causer des erreurs "network-request-failed" en dev
-        // Activé en mode souple pour permettre le développement local
+        // 🔒 Firebase App Check - TEMPORAIREMENT DÉSACTIVÉ
+        // RAISON: Cause des erreurs "network-request-failed" qui bloquent la connexion
+        // TODO: Réactiver après configuration complète dans Firebase Console
+        // Instructions: Voir FIX-ERREUR-FIREBASE-RESEAU.md
+        /*
         try {
             const appCheck = initializeAppCheck(app, {
                 provider: new ReCaptchaV3Provider('6LdVPo8qAAAAAJTMf1VMEFhD_pEPe0dKc_B7VF3W'),
@@ -363,8 +365,9 @@
             console.log('✅ App Check activé');
         } catch (error) {
             console.warn('⚠️ App Check désactivé (mode dev):', error.message);
-            // App Check optionnel - l'app fonctionne sans lui en développement
         }
+        */
+        console.log('⚠️ App Check désactivé temporairement pour permettre la connexion');
         
         const auth = getAuth(app);
         const db = getFirestore(app);
