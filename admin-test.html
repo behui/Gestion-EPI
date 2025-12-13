@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Panneau d'administration PPVE - Gestion des utilisateurs, permissions et accès au système de casiers">
+    <meta name="keywords" content="administration, gestion utilisateurs, permissions, PPVE admin">
+    
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.gstatic.com">
+    <link rel="canonical" href="https://behui.github.io/Gestion-EPI/admin-test.html">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com; font-src 'self' data:;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    
+    <title>Administration - Gestion Utilisateurs & Permissions | PPVE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+        }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .permissions-section {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .permissions-section.show {
+            display: block;
+        }
+
+        .permissions-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .permissions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        .permission-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .permission-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .permission-item label {
+            cursor: pointer;
+            font-size: 0.95em;
+            margin: 0;
+            flex: 1;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            min-height: 44px;
+            min-width: 44px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 16px;
+            font-size: 0.85em;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-edit {
+            background: #f59e0b;
+            color: white;
+            padding: 8px 16px;
+            font-size: 0.85em;
+            margin-right: 8px;
+        }
+
+        .btn-edit:hover {
+            background: #d97706;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .users-table th {
+            background: #f8f9fa;
+            color: #667eea;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .users-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-admin {
+            background: #667eea;
+            color: white;
+        }
+
+        .badge-user {
+            background: #3498db;
+            color: white;
+        }
+
+        .badge-hybrid {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .permissions-summary {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .permissions-summary .perm-icon {
+            margin-right: 5px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideIn 0.3s;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .modal-header h3 {
+            color: #667eea;
+            margin: 0;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        .uid-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 15px 0;
+            border: 2px solid #667eea;
+            word-break: break-all;
+        }
+
+        .uid-label {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .copy-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #45a049;
+        }
+
+        /* === RESPONSIVE MOBILE === */
+        @media (max-width: 1024px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .permissions-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.3em;
+            }
+
+            .header > div {
+                width: 100%;
+            }
+
+            .header > div:first-child {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .header > div:last-child {
+                flex-direction: column;
+            }
+
+            .btn-logout {
+                width: 100%;
+                padding: 12px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .card h2 {
+                font-size: 1.2em;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .permissions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .users-table {
+                font-size: 0.85em;
+            }
+
+            .users-table th,
+            .users-table td {
+                padding: 8px 5px;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.9em;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.1em;
+            }
+
+            .users-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .badge {
+                font-size: 0.75em;
+                padding: 3px 8px;
+            }
+
+            .btn-edit,
+            .btn-danger {
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip Navigation for Accessibility -->
+    <a href="#main-content" class="skip-link" style="position: absolute; left: -9999px; z-index: 999; padding: 1em; background: #667eea; color: white; text-decoration: none;">Aller au contenu principal</a>
+    <style>.skip-link:focus { left: 10px; top: 10px; }</style>
+    
+    <div class="header" id="main-content">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div>
+                <h1><span aria-hidden="true">👤</span> Administration - Gestion Utilisateurs et Permissions PPVE</h1>
+                <p id="admin-info" style="opacity: 0.9; margin-top: 5px;"></p>
+            </div>
+            <button id="admin-tools-btn" class="btn-logout" onclick="location.href='admin-administrator.html'" style="background: linear-gradient(135deg, #ff0080 0%, #7928ca 100%); border: none;">
+                🔧 Admin Tools
+            </button>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn-logout" onclick="location.href='gestion-casiers.html'">
+                🏠 Retour à l'application
+            </button>
+            <button class="btn-logout" onclick="logout()">
+                🚪 Déconnexion
+            </button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="alert" class="alert"></div>
+
+        <!-- Formulaire d'ajout d'utilisateur -->
+        <div class="card">
+            <h2>➕ Créer un Nouvel Utilisateur</h2>
+            <form id="add-user-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="prenom">Prénom *</label>
+                        <input type="text" id="prenom" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nom">Nom *</label>
+                        <input type="text" id="nom" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Mot de passe * (min. 6 car.)</label>
+                        <input type="password" id="password" minlength="6" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password-confirm">Confirmer mot de passe *</label>
+                        <input type="password" id="password-confirm" minlength="6" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Rôle *</label>
+                        <select id="role" required onchange="togglePermissions()">
+                            <option value="">-- Choisir --</option>
+                            <option value="utilisateur">👤 Utilisateur</option>
+                            <option value="admin">🔑 Administrateur</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Permissions avancées (visible uniquement pour utilisateur) -->
+                <div id="permissions-section" class="permissions-section">
+                    <h3>⚙️ Permissions Avancées (Profil Hybride)</h3>
+                    <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
+                        Cochez les permissions pour créer un utilisateur avec accès spécifiques.
+                    </p>
+                    <div class="permissions-grid">
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm-view-casiers">
+                            <label for="perm-view-casiers">
+                                <strong>👁️ Voir Vue d'ensemble Casiers</strong><br>
+                                <small style="color: #666;">Consulter les casiers en lecture seule</small>
+                            </label>
+                        </div>
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm-edit-casiers">
+                            <label for="perm-edit-casiers">
+                                <strong>✏️ Modifier les Casiers</strong><br>
+                                <small style="color: #666;">Attribuer/Libérer des casiers</small>
+                            </label>
+                        </div>
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm-view-equipements">
+                            <label for="perm-view-equipements">
+                                <strong>👁️ Voir Gestion Équipements</strong><br>
+                                <small style="color: #666;">Consulter les équipements</small>
+                            </label>
+                        </div>
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm-edit-equipements">
+                            <label for="perm-edit-equipements">
+                                <strong>✏️ Modifier les Équipements</strong><br>
+                                <small style="color: #666;">Gérer le stock/maintenance</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="add-btn" style="margin-top: 20px;">
+                    ✅ Créer l'Utilisateur
+                </button>
+            </form>
+        </div>
+
+        <!-- Liste des utilisateurs -->
+        <div class="card">
+            <h2>📋 Liste des Utilisateurs</h2>
+            <div id="users-container"></div>
+        </div>
+    </div>
+
+    <!-- Modal d'édition des permissions -->
+    <div id="edit-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="edit-modal-title"><span aria-hidden="true">⚙️</span> Modifier les Permissions</h3>
+                <button class="close-modal" onclick="closeEditModal()" aria-label="Fermer la modale">&times;</button>
+            </div>
+            <div id="edit-form-container"></div>
+        </div>
+    </div>
+
+    <!-- Modal de création profil Firestore après Authentication -->
+    <div id="firestore-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="firestore-modal-title">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="firestore-modal-title"><span aria-hidden="true">🔑</span> Création Profil Firestore</h3>
+                <button class="close-modal" onclick="closeFirestoreModal()" aria-label="Fermer la modale">&times;</button>
+            </div>
+            <div id="firestore-form-container"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { initializeAppCheck, ReCaptchaV3Provider } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMPBik5vpX8qOYWuhPzpJZoOLjE20pl6g",
+            authDomain: "gestion-epi-4387a.firebaseapp.com",
+            projectId: "gestion-epi-4387a",
+            storageBucket: "gestion-epi-4387a.firebasestorage.app",
+            messagingSenderId: "974706767408",
+            appId: "1:974706767408:web:fde01e52a3a986d6da9ff5",
+            measurementId: "G-PKNXH32P0Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        
+        // 🔒 Firebase App Check - TEMPORAIREMENT DÉSACTIVÉ
+        // RAISON: Cause des erreurs "network-request-failed" qui bloquent la connexion
+        // TODO: Réactiver après configuration complète dans Firebase Console
+        /*
+        try {
+            const appCheck = initializeAppCheck(app, {
+                provider: new ReCaptchaV3Provider('6LdVPo8qAAAAAJTMf1VMEFhD_pEPe0dKc_B7VF3W'),
+                isTokenAutoRefreshEnabled: true
+            });
+        } catch (error) {
+            console.warn('⚠️ App Check désactivé');
+        }
+        */
+        console.log('⚠️ App Check désactivé temporairement');
+        
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // ═══════════════════════════════════════════════════════════════
+        // � CONSTANTS (Code Quality - Phase 1)
+        // ═══════════════════════════════════════════════════════════════
+
+        const USER_ROLES = {
+            ADMIN: 'admin',
+            USER: 'utilisateur'
+        };
+
+        const MESSAGES = {
+            SUCCESS: {
+                USER_CREATED: (prenom, nom, email) => `✅ Utilisateur créé : ${prenom} ${nom} (${email})`,
+                USER_DELETED: (nom) => `✅ Utilisateur ${nom} supprimé`,
+                PERMISSIONS_UPDATED: '✅ Permissions mises à jour'
+            },
+            ERROR: {
+                INVALID_NAME: '❌ Le prénom/nom doit contenir entre 2 et 50 caractères (lettres uniquement)',
+                INVALID_EMAIL: '❌ Format email invalide',
+                INVALID_PASSWORD: '❌ Le mot de passe doit contenir au moins 6 caractères',
+                PASSWORD_MISMATCH: '❌ Les mots de passe ne correspondent pas',
+                EMAIL_EXISTS: '❌ Cet email est déjà utilisé',
+                CREATE_FAILED: '❌ Erreur lors de la création de l\'utilisateur',
+                DELETE_FAILED: '❌ Erreur lors de la suppression'
+            },
+            CONFIRM: {
+                DELETE_USER: (nom) => `⚠️ Confirmer la suppression de ${nom} ?`
+            }
+        };
+
+        // ═══════════════════════════════════════════════════════════════
+        // �🛠️ UTILITY FUNCTIONS (Code Quality Improvement)
+        // ═══════════════════════════════════════════════════════════════
+        
+        /**
+         * Valide un format email
+         * @param {string} email - L'email à valider
+         * @returns {boolean} true si valide
+         */
+        function validateEmail(email) {
+            if (!email || typeof email !== 'string') return false;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email.trim());
+        }
+
+        /**
+         * Valide un prénom ou nom (2-50 caractères)
+         * @param {string} name - Le nom à valider
+         * @returns {boolean} true si valide
+         */
+        function validateName(name) {
+            if (!name || typeof name !== 'string') return false;
+            const trimmed = name.trim();
+            return trimmed.length >= 2 && trimmed.length <= 50 && /^[a-zA-ZÀ-ÿ\s\-']+$/.test(trimmed);
+        }
+
+        /**
+         * Sanitize une chaîne de caractères
+         * @param {string} str - La chaîne à nettoyer
+         * @returns {string} Chaîne nettoyée
+         */
+        function sanitizeString(str) {
+            if (!str || typeof str !== 'string') return '';
+            return str.trim().replace(/\s+/g, ' ');
+        }
+
+        /**
+         * Log une action administrateur pour audit
+         * @param {string} action - Type d'action
+         * @param {Object} details - Détails de l'action
+         */
+        function logAdminAction(action, details) {
+            console.log(`🔐 [ADMIN] [${new Date().toISOString()}] ${action}:`, details);
+        }
+
+        /**
+         * Affiche un message d'erreur utilisateur
+         * @param {string} message - Le message d'erreur
+         */
+        function showUserError(message) {
+            console.error('❌', message);
+            alert(message);
+        }
+
+        // Vérifier l'authentification ET le rôle admin
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                console.log('❌ Pas d\'utilisateur connecté');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // ✅ ACCÈS DIRECT - Pas de vérification
+            console.log('✅ Accès autorisé:', user.email);
+            document.getElementById('admin-info').textContent = `Connecté: ${user.email}`;
+            loadUsers();
+            
+            try {
+                console.error('⚠️ Erreur chargement profil:', error);
+                document.getElementById('admin-info').textContent = 
+                    `Connecté en tant que: ${user.email}`;
+                loadUsers();
+            }
+        });
+
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alert');
+            alertBox.textContent = message;
+            alertBox.className = `alert alert-${type} show`;
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+            }, 5000);
+        }
+
+        window.togglePermissions = function() {
+            const role = document.getElementById('role').value;
+            const permSection = document.getElementById('permissions-section');
+            
+            if (role === 'utilisateur') {
+                permSection.classList.add('show');
+            } else {
+                permSection.classList.remove('show');
+            }
+        };
+
+        function getPermissions() {
+            return {
+                viewCasiers: document.getElementById('perm-view-casiers').checked,
+                editCasiers: document.getElementById('perm-edit-casiers').checked,
+                viewEquipements: document.getElementById('perm-view-equipements').checked,
+                editEquipements: document.getElementById('perm-edit-equipements').checked
+            };
+        }
+
+        // Créer un utilisateur
+        document.getElementById('add-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('add-btn');
+            const prenom = document.getElementById('prenom').value.trim();
+            const nom = document.getElementById('nom').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const passwordConfirm = document.getElementById('password-confirm').value;
+            const role = document.getElementById('role').value;
+
+            // Validation
+            if (!prenom || !nom || !email || !password || !passwordConfirm || !role) {
+                showAlert('❌ Veuillez remplir tous les champs obligatoires.', 'error');
+                return;
+            }
+
+            // Vérification correspondance des mots de passe
+            if (password !== passwordConfirm) {
+                showAlert(MESSAGES.ERROR.PASSWORD_MISMATCH, 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Création en cours...';
+
+            // Sauvegarder l'admin actuel avant de créer le nouveau compte
+            const currentAdmin = auth.currentUser;
+            const currentAdminEmail = currentAdmin.email;
+
+            try {
+                // Vérifier d'abord si l'email existe déjà dans deleted_users
+                console.log('🔹 Vérification si utilisateur supprimé existe...');
+                const deletedUsersSnapshot = await getDocs(collection(db, 'deleted_users'));
+                let deletedUserDoc = null;
+                let deletedUserId = null;
+                
+                deletedUsersSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.email === email) {
+                        deletedUserDoc = data;
+                        deletedUserId = doc.id;
+                    }
+                });
+
+                if (deletedUserDoc) {
+                    // L'utilisateur a été supprimé précédemment, on réactive son compte
+                    console.log('✅ Utilisateur supprimé trouvé, UID:', deletedUserId);
+                    console.log('🔹 Réactivation du profil Firestore avec les nouvelles données...');
+                    
+                    // Préparer les données utilisateur
+                    const userData = {
+                        prenom: prenom,
+                        nom: nom,
+                        email: email,
+                        role: role,
+                        createdAt: new Date().toISOString(),
+                        reactivatedAt: new Date().toISOString(),
+                        reactivatedBy: currentAdminEmail,
+                        previouslyDeleted: true
+                    };
+
+                    // Ajouter les permissions pour les utilisateurs non-admin
+                    if (role === 'utilisateur') {
+                        userData.permissions = getPermissions();
+                        console.log('🔹 Permissions:', userData.permissions);
+                    }
+
+                    // Recréer le profil Firestore avec l'ancien UID
+                    await setDoc(doc(db, 'users', deletedUserId), userData);
+                    console.log('✅ Profil Firestore réactivé!');
+
+                    // Supprimer l'entrée deleted_users
+                    await deleteDoc(doc(db, 'deleted_users', deletedUserId));
+                    console.log('✅ Trace de suppression nettoyée');
+
+                    showAlert(`✅ Utilisateur ${prenom} ${nom} réactivé avec succès!\n\n🔄 Le compte Authentication existant a été réutilisé.\nLe mot de passe reste inchangé.`, 'success');
+                    
+                    // Recharger la liste
+                    document.getElementById('add-user-form').reset();
+                    document.getElementById('permissions-section').classList.remove('show');
+                    loadUsers();
+
+                    btn.disabled = false;
+                    btn.textContent = '✅ Créer l\'Utilisateur';
+                    return;
+                }
+
+                // Utilisateur nouveau, procéder normalement
+                console.log('🔹 Création d\'un nouveau compte Authentication pour:', email);
+                console.log('🔹 Admin actuel avant création:', auth.currentUser ? auth.currentUser.email : 'AUCUN');
+                
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const newUser = userCredential.user;
+                const newUid = newUser.uid;
+                
+                console.log('✅ Compte Authentication créé, UID:', newUid);
+                console.log('🔹 Utilisateur actuel après création:', auth.currentUser ? auth.currentUser.email : 'AUCUN');
+
+                // IMPORTANT: Préparer les données AVANT toute opération Firestore
+                const userData = {
+                    prenom: prenom,
+                    nom: nom,
+                    email: email,
+                    role: role,
+                    createdAt: new Date().toISOString(),
+                    createdBy: currentAdminEmail
+                };
+
+                // Ajouter les permissions pour les utilisateurs non-admin
+                if (role === USER_ROLES.USER) {
+                    userData.permissions = getPermissions();
+                    console.log('🔹 Permissions:', userData.permissions);
+                }
+
+                // CRÉER DIRECTEMENT LE PROFIL FIRESTORE (pas de modal)
+                console.log('🔹 Création profil Firestore...');
+                
+                try {
+                    await setDoc(doc(db, 'users', newUid), userData);
+                    console.log('✅ Profil Firestore créé avec succès');
+                    showAlert(MESSAGES.SUCCESS.USER_CREATED(prenom, nom, email), 'success');
+                    
+                    // Recharger la liste des utilisateurs
+                    loadUsers();
+                    
+                    // Réinitialiser le formulaire
+                    document.getElementById('add-user-form').reset();
+                } catch (firestoreError) {
+                    console.error('❌ Erreur création Firestore:', firestoreError);
+                    showAlert('⚠️ Compte créé mais erreur Firestore. Utilisez l\'outil de réparation.', 'warning');
+                }
+                
+                // Réinitialiser le bouton
+                btn.disabled = false;
+                btn.textContent = '✅ Créer l\'Utilisateur';
+                
+                // Redirection automatique supprimée - l'admin reste connecté
+
+            } catch (error) {
+                console.error('❌ Erreur complète:', error);
+                let msg = '❌ Erreur lors de la création: ' + error.message;
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    msg = MESSAGES.ERROR.EMAIL_EXISTS;
+                } else if (error.code === 'auth/weak-password') {
+                    msg = '❌ Mot de passe trop faible (minimum 6 caractères).';
+                } else if (error.code === 'auth/invalid-email') {
+                    msg = '❌ Format d\'email invalide.';
+                } else if (error.code === 'auth/network-request-failed') {
+                    msg = '❌ Erreur réseau. Vérifiez votre connexion Internet.';
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    msg = '❌ Opération non autorisée. Contactez l\'administrateur système.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    msg = '❌ Trop de tentatives. Réessayez dans quelques minutes.';
+                } else if (error.code === 'permission-denied') {
+                    msg = '❌ Permissions insuffisantes. Vérifiez vos droits Firebase.';
+                }
+                
+                showAlert(msg, 'error');
+                
+                btn.disabled = false;
+                btn.textContent = '✅ Créer l\'Utilisateur';
+            }
+        });
+
+        // Charger la liste des utilisateurs
+        async function loadUsers() {
+            const container = document.getElementById('users-container');
+            container.innerHTML = '<p style="text-align:center; padding:20px;">⏳ Chargement...</p>';
+
+            try {
+                const snapshot = await getDocs(collection(db, 'users'));
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<p style="text-align:center; padding:40px; color:#999;">Aucun utilisateur trouvé.</p>';
+                    return;
+                }
+
+                let html = '<table class="users-table"><thead><tr>';
+                html += '<th>Utilisateur</th><th>Email</th><th>Rôle</th><th>Permissions</th><th>Actions</th>';
+                html += '</tr></thead><tbody>';
+
+                snapshot.forEach(doc => {
+                    const user = doc.data();
+                    const uid = doc.id;
+                    
+                    let badgeClass = user.role === USER_ROLES.ADMIN ? 'badge-admin' : 'badge-user';
+                    let badgeText = user.role === USER_ROLES.ADMIN ? '🔑 Admin' : '👤 Utilisateur';
+                    
+                    // Vérifier si c'est un profil hybride
+                    const perms = user.permissions || {};
+                    const hasPerms = perms.viewCasiers || perms.editCasiers || perms.viewEquipements || perms.editEquipements;
+                    
+                    if (user.role === USER_ROLES.USER && hasPerms) {
+                        badgeClass = 'badge-hybrid';
+                        badgeText = '⚡ Hybride';
+                    }
+
+                    let permSummary = '';
+                    if (user.role === USER_ROLES.ADMIN) {
+                        permSummary = '<span class="permissions-summary">✅ Accès complet</span>';
+                    } else if (hasPerms) {
+                        permSummary = '<div class="permissions-summary">';
+                        if (perms.viewCasiers) permSummary += '<span class="perm-icon">👁️📦</span>';
+                        if (perms.editCasiers) permSummary += '<span class="perm-icon">✏️📦</span>';
+                        if (perms.viewEquipements) permSummary += '<span class="perm-icon">👁️🎭</span>';
+                        if (perms.editEquipements) permSummary += '<span class="perm-icon">✏️🎭</span>';
+                        permSummary += '</div>';
+                    } else {
+                        permSummary = '<span class="permissions-summary" style="color:#999;">Espace utilisateur uniquement</span>';
+                    }
+
+                    html += `<tr>
+                        <td><strong>${user.prenom} ${user.nom}</strong></td>
+                        <td>${user.email}</td>
+                        <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+                        <td>${permSummary}</td>
+                        <td>
+                            ${user.role !== USER_ROLES.ADMIN ? `<button class="btn btn-edit" onclick="editPermissions('${uid}')">⚙️ Permissions</button>` : ''}
+                            <button class="btn btn-danger" onclick="deleteUser('${uid}', '${user.email}')">🗑️</button>
+                        </td>
+                    </tr>`;
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error('Erreur chargement:', error);
+                container.innerHTML = '<p style="text-align:center; padding:20px; color:red;">❌ Erreur de chargement</p>';
+            }
+        }
+
+        /**
+         * Ouvre le modal d'édition des permissions pour un utilisateur
+         * @param {string} userId - L'UID de l'utilisateur
+         */
+        window.editPermissions = async function(userId) {
+            try {
+                logAdminAction('OPEN_EDIT_PERMISSIONS', { userId });
+                const userDoc = await getDoc(doc(db, 'users', userId));
+                if (!userDoc.exists()) {
+                    showUserError('❌ Utilisateur introuvable');
+                    return;
+                }
+
+                const userData = userDoc.data();
+                const perms = userData.permissions || {};
+
+                const container = document.getElementById('edit-form-container');
+                container.innerHTML = `
+                    <p style="margin-bottom: 15px;">
+                        <strong>Utilisateur:</strong> ${userData.prenom} ${userData.nom}<br>
+                        <strong>Email:</strong> ${userData.email}
+                    </p>
+                    <div class="permissions-grid">
+                        <div class="permission-item">
+                            <input type="checkbox" id="edit-perm-view-casiers" ${perms.viewCasiers ? 'checked' : ''}>
+                            <label for="edit-perm-view-casiers"><strong>👁️ Voir Casiers</strong></label>
+                        </div>
+                        <div class="permission-item">
+                            <input type="checkbox" id="edit-perm-edit-casiers" ${perms.editCasiers ? 'checked' : ''}>
+                            <label for="edit-perm-edit-casiers"><strong>✏️ Modifier Casiers</strong></label>
+                        </div>
+                        <div class="permission-item">
+                            <input type="checkbox" id="edit-perm-view-equipements" ${perms.viewEquipements ? 'checked' : ''}>
+                            <label for="edit-perm-view-equipements"><strong>👁️ Voir Équipements</strong></label>
+                        </div>
+                        <div class="permission-item">
+                            <input type="checkbox" id="edit-perm-edit-equipements" ${perms.editEquipements ? 'checked' : ''}>
+                            <label for="edit-perm-edit-equipements"><strong>✏️ Modifier Équipements</strong></label>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="savePermissions('${userId}')">
+                        💾 Enregistrer les Permissions
+                    </button>
+                `;
+
+                document.getElementById('edit-modal').classList.add('show');
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('❌ Erreur lors du chargement des permissions.', 'error');
+            }
+        };
+
+        window.savePermissions = async function(userId) {
+            try {
+                const newPerms = {
+                    viewCasiers: document.getElementById('edit-perm-view-casiers').checked,
+                    editCasiers: document.getElementById('edit-perm-edit-casiers').checked,
+                    viewEquipements: document.getElementById('edit-perm-view-equipements').checked,
+                    editEquipements: document.getElementById('edit-perm-edit-equipements').checked
+                };
+
+                await updateDoc(doc(db, 'users', userId), {
+                    permissions: newPerms
+                });
+
+                showAlert(MESSAGES.SUCCESS.PERMISSIONS_UPDATED, 'success');
+                closeEditModal();
+                loadUsers();
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('❌ Erreur lors de la sauvegarde.', 'error');
+            }
+        };
+
+        window.closeEditModal = function() {
+            document.getElementById('edit-modal').classList.remove('show');
+        };
+
+        /**
+         * Supprime un utilisateur avec confirmation sécurisée
+         * @param {string} userId - L'UID de l'utilisateur
+         * @param {string} userEmail - L'email de l'utilisateur
+         */
+        window.deleteUser = async function(userId, userEmail) {
+            logAdminAction('DELETE_USER_ATTEMPT', { userId, userEmail });
+            // Récupérer le nom de l'utilisateur
+            let userName = userEmail;
+            try {
+                const userDoc = await getDoc(doc(db, 'users', userId));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    userName = `${data.prenom} ${data.nom}`;
+                }
+            } catch (e) {
+                console.error('Erreur récupération infos:', e);
+            }
+
+            // Demander confirmation en tapant SUPPRIMER
+            const confirmText = prompt(`⚠️ CONFIRMATION\n\nPour supprimer ${userName}, tapez:\nSUPPRIMER`);
+            
+            if (confirmText !== 'SUPPRIMER') {
+                return;
+            }
+
+            try {
+                console.log('🔹 Suppression du profil Firestore:', userId);
+                
+                // Créer une trace de la suppression
+                await setDoc(doc(db, 'deleted_users', userId), {
+                    email: userEmail,
+                    deletedAt: new Date().toISOString(),
+                    deletedBy: auth.currentUser ? auth.currentUser.email : 'unknown',
+                    userName: userName
+                });
+                
+                // Supprimer le document Firestore
+                await deleteDoc(doc(db, 'users', userId));
+                console.log('✅ Profil supprimé');
+                
+                showAlert(MESSAGES.SUCCESS.USER_DELETED(userName), 'success');
+                loadUsers();
+            } catch (error) {
+                console.error('❌ Erreur suppression:', error);
+                showAlert('❌ Erreur: ' + error.message, 'error');
+            }
+        };
+
+        window.closeFirestoreModal = function() {
+            document.getElementById('firestore-modal').classList.remove('show');
+        };
+
+        window.showFirestoreModal = function(uid, email, prenom, nom, role, permissions) {
+            const container = document.getElementById('firestore-form-container');
+            
+            const isAdmin = role === USER_ROLES.ADMIN;
+            const adminNote = isAdmin ? '<div style="margin-top: 10px; padding: 10px; background: #e8f5e9; border: 2px solid #4caf50; border-radius: 8px; font-size: 14px; color: #1b5e20;">✅ <strong>Administrateur:</strong> Accès complet à toutes les fonctionnalités par défaut.</div>' : '';
+            
+            container.innerHTML = `
+                <div class="status-box status-info" style="background: #e3f2fd; border: 2px solid #2196f3; color: #0d47a1; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    ✅ Compte Firebase Authentication créé avec succès!<br>
+                    📝 Complétez maintenant le profil Firestore ci-dessous.
+                </div>
+
+                <div class="uid-label">🔑 UID Firebase (copiez-le si besoin):</div>
+                <div class="uid-display" id="uid-display">${uid}</div>
+                <button class="copy-btn" onclick="copyUID('${uid}')">📋 Copier l'UID</button>
+
+                <form id="firestore-create-form" style="margin-top: 25px;">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Email:</label>
+                        <input type="text" id="fs-email" value="${email}" readonly style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; background: #f5f5f5;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Prénom:</label>
+                        <input type="text" id="fs-prenom" value="${prenom}" required style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Nom:</label>
+                        <input type="text" id="fs-nom" value="${nom}" required style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Rôle:</label>
+                        <select id="fs-role" required style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;" onchange="toggleFsPermissions()">
+                            <option value="utilisateur" ${role === 'utilisateur' ? 'selected' : ''}>👤 Utilisateur</option>
+                            <option value="admin" ${role === 'admin' ? 'selected' : ''}>🔑 Administrateur</option>
+                        </select>
+                        ${adminNote}
+                    </div>
+
+                    <div id="fs-permissions-section" style="${isAdmin ? 'display: none;' : 'display: block;'} margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                        <h4 style="color: #667eea; margin-bottom: 15px;">⚙️ Permissions Avancées</h4>
+                        <div class="permissions-grid">
+                            <div class="permission-item">
+                                <input type="checkbox" id="fs-perm-view-casiers" ${permissions?.viewCasiers ? 'checked' : ''}>
+                                <label for="fs-perm-view-casiers"><strong>👁️ Voir Casiers</strong></label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" id="fs-perm-edit-casiers" ${permissions?.editCasiers ? 'checked' : ''}>
+                                <label for="fs-perm-edit-casiers"><strong>✏️ Modifier Casiers</strong></label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" id="fs-perm-view-equipements" ${permissions?.viewEquipements ? 'checked' : ''}>
+                                <label for="fs-perm-view-equipements"><strong>👁️ Voir Équipements</strong></label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" id="fs-perm-edit-equipements" ${permissions?.editEquipements ? 'checked' : ''}>
+                                <label for="fs-perm-edit-equipements"><strong>✏️ Modifier Équipements</strong></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:20px;">
+                        💾 Créer le Profil Firestore Maintenant
+                    </button>
+                </form>
+
+                <div style="margin-top: 15px; padding: 15px; background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; font-size: 14px;">
+                    ⚠️ <strong>Important:</strong> Le compte Authentication existe déjà.<br>
+                    Vous devez maintenant créer le profil Firestore pour que l'utilisateur puisse se connecter.
+                </div>
+            `;
+
+            document.getElementById('firestore-modal').classList.add('show');
+
+            // Gestionnaire du formulaire
+            document.getElementById('firestore-create-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await createFirestoreProfile(uid);
+            });
+        };
+
+        window.toggleFsPermissions = function() {
+            const role = document.getElementById('fs-role').value;
+            const permSection = document.getElementById('fs-permissions-section');
+            permSection.style.display = role === 'utilisateur' ? 'block' : 'none';
+        };
+
+        window.copyUID = function(uid) {
+            navigator.clipboard.writeText(uid).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copié!';
+                btn.style.background = '#4caf50';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#4caf50';
+                }, 2000);
+            }).catch(err => {
+                alert('Erreur copie: ' + err);
+            });
+        };
+
+        window.createFirestoreProfile = async function(uid) {
+            const btn = document.querySelector('#firestore-create-form button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = '⏳ Création en cours...';
+
+            try {
+                const prenom = document.getElementById('fs-prenom').value.trim();
+                const nom = document.getElementById('fs-nom').value.trim();
+                const email = document.getElementById('fs-email').value;
+                const role = document.getElementById('fs-role').value;
+
+                const profileData = {
+                    prenom: prenom,
+                    nom: nom,
+                    email: email,
+                    role: role,
+                    createdAt: new Date().toISOString(),
+                    createdBy: auth.currentUser ? auth.currentUser.email : window.pendingUserData.createdBy,
+                    createdViaModal: true
+                };
+
+                if (role === USER_ROLES.USER) {
+                    // Permissions personnalisées pour utilisateurs
+                    profileData.permissions = {
+                        viewCasiers: document.getElementById('fs-perm-view-casiers').checked,
+                        editCasiers: document.getElementById('fs-perm-edit-casiers').checked,
+                        viewEquipements: document.getElementById('fs-perm-view-equipements').checked,
+                        editEquipements: document.getElementById('fs-perm-edit-equipements').checked
+                    };
+                } else if (role === USER_ROLES.ADMIN) {
+                    // Admin = tous les droits par défaut (pas de champ permissions)
+                    console.log('✅ Profil Admin: Accès complet automatique');
+                }
+
+                console.log('🔹 Création Firestore avec UID:', uid);
+                console.log('🔹 Données:', profileData);
+
+                await setDoc(doc(db, 'users', uid), profileData);
+                console.log('✅ Profil Firestore créé!');
+
+                // Vérification
+                const verifyDoc = await getDoc(doc(db, 'users', uid));
+                if (verifyDoc.exists()) {
+                    console.log('✅ VÉRIFICATION OK:', verifyDoc.data());
+                    
+                    showAlert(`✅✅✅ PROFIL COMPLET CRÉÉ!\n\nAuthentication: ✅\nFirestore: ✅\n\nL'utilisateur ${prenom} ${nom} peut maintenant se connecter!`, 'success');
+                    
+                    closeFirestoreModal();
+                    
+                    // Recharger la liste
+                    loadUsers();
+                    
+                    // Réinitialiser le formulaire de création
+                    document.getElementById('add-user-form').reset();
+                    document.getElementById('permissions-section').classList.remove('show');
+                } else {
+                    throw new Error('Document non trouvé après création');
+                }
+
+            } catch (error) {
+                console.error('❌ Erreur création Firestore:', error);
+                showAlert('❌ Erreur lors de la création Firestore: ' + error.message, 'error');
+                btn.disabled = false;
+                btn.textContent = '💾 Créer le Profil Firestore Maintenant';
+            }
+        };
+
+        window.logout = async function() {
+            if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
+                await auth.signOut();
+                window.location.href = 'login.html';
+            }
+        };
+
+        window.loadUsers = loadUsers;
+    </script>
+</body>
+</html>
