@@ -352,18 +352,18 @@
             }
         };
         
-        // 🔒 Firebase App Check - Protection anti-bot et abus
-        // TODO: Remplacer 'YOUR_RECAPTCHA_V3_SITE_KEY' par votre clé reCAPTCHA v3
-        // 1. Créez une clé sur: https://console.cloud.google.com/security/recaptcha
-        // 2. Activez App Check: https://console.firebase.google.com/project/gestion-epi-4387a/appcheck
-        // 3. Remplacez la clé ci-dessous
+        // 🔒 Firebase App Check - Protection anti-bot et abus (MODE DEBUG)
+        // Note: App Check peut causer des erreurs "network-request-failed" en dev
+        // Activé en mode souple pour permettre le développement local
         try {
             const appCheck = initializeAppCheck(app, {
                 provider: new ReCaptchaV3Provider('6LdVPo8qAAAAAJTMf1VMEFhD_pEPe0dKc_B7VF3W'),
                 isTokenAutoRefreshEnabled: true
             });
+            console.log('✅ App Check activé');
         } catch (error) {
-            console.warn('⚠️ App Check non configuré:', error.message);
+            console.warn('⚠️ App Check désactivé (mode dev):', error.message);
+            // App Check optionnel - l'app fonctionne sans lui en développement
         }
         
         const auth = getAuth(app);
@@ -534,6 +534,9 @@
                         break;
                     case 'auth/invalid-credential':
                         errorMessage = MESSAGES.ERROR.LOGIN_FAILED;
+                        break;
+                    case 'auth/network-request-failed':
+                        errorMessage = '❌ Erreur réseau. Vérifiez votre connexion internet ou réessayez dans quelques instants.';
                         break;
                     case 'auth/too-many-requests':
                         errorMessage = '❌ Trop de tentatives. Réessayez plus tard.';
