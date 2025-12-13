@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Connexion au système de gestion des casiers et équipements de protection PPVE - Accès sécurisé pour employés et administrateurs">
+    <meta name="keywords" content="gestion casiers, PPVE, EPI, connexion, masques, équipements protection">
+    <meta name="author" content="PPVE">
+    
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.gstatic.com">
+    <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://behui.github.io/Gestion-EPI/index.html">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://behui.github.io/Gestion-EPI/">
+    <meta property="og:title" content="Gestion Casiers PPVE - Système EPI">
+    <meta property="og:description" content="Plateforme de gestion des casiers et équipements de protection individuelle">
+    <meta property="og:locale" content="fr_FR">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Gestion Casiers PPVE">
+    <meta name="twitter:description" content="Système de gestion des équipements de protection individuelle">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com; font-src 'self' data:;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    
+    <title>Connexion - Gestion Casiers PPVE | Système EPI</title>
+    
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Gestion Casiers PPVE",
+      "description": "Système de gestion des casiers et équipements de protection individuelle",
+      "url": "https://behui.github.io/Gestion-EPI/",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "provider": {
+        "@type": "Organization",
+        "name": "PPVE"
+      }
+    }
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            min-height: 44px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .alert-error {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+
+        .alert-success {
+            background: #efe;
+            color: #3c3;
+            border: 1px solid #cfc;
+        }
+
+        .alert.show {
+            display: block;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        /* === RESPONSIVE MOBILE === */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .login-container {
+                padding: 25px;
+                max-width: 100%;
+            }
+
+            .logo h1 {
+                font-size: 2em;
+            }
+
+            .logo p {
+                font-size: 0.9em;
+            }
+
+            .form-group input {
+                padding: 14px 12px;
+                font-size: 16px; /* Évite le zoom sur iOS */
+            }
+
+            .btn-login {
+                padding: 16px;
+                font-size: 1em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 20px;
+            }
+
+            .logo h1 {
+                font-size: 1.8em;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip Navigation for Accessibility -->
+    <a href="#main-content" class="skip-link" style="position: absolute; left: -9999px; z-index: 999; padding: 1em; background: #667eea; color: white; text-decoration: none;">Aller au contenu principal</a>
+    
+    <div class="login-container" id="main-content">
+        <div class="logo">
+            <h1 style="font-size: 3em; margin: 0;"><span aria-hidden="true">🔐</span> <span style="font-size: 0.6em; display: block; margin-top: 10px;">Connexion PPVE</span></h1>
+            <p style="display: none;">Gestion Casiers PPVE</p>
+        </div>
+
+        <div id="alert" class="alert" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email"><span aria-hidden="true">📧</span> Adresse email</label>
+                <input type="email" id="email" name="email" placeholder="votre.email@exemple.com" autocomplete="email" aria-required="true" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password"><span aria-hidden="true">🔑</span> Mot de passe</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" aria-required="true" minlength="6" required>
+            </div>
+
+            <button type="submit" class="btn-login" id="login-btn" aria-label="Se connecter au système">
+                Se connecter
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px; color: #667eea;">Connexion en cours...</p>
+        </div>
+
+        <div class="footer">
+            🔒 Connexion sécurisée Firebase
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { initializeAppCheck, ReCaptchaV3Provider } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMPBik5vpX8qOYWuhPzpJZoOLjE20pl6g",
+            authDomain: "gestion-epi-4387a.firebaseapp.com",
+            projectId: "gestion-epi-4387a",
+            storageBucket: "gestion-epi-4387a.firebasestorage.app",
+            messagingSenderId: "974706767408",
+            appId: "1:974706767408:web:fde01e52a3a986d6da9ff5",
+            measurementId: "G-PKNXH32P0Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        
+        // ═══════════════════════════════════════════════════════════════
+        // 📋 CONSTANTS (Code Quality - Phase 1)
+        // ═══════════════════════════════════════════════════════════════
+
+        const MESSAGES = {
+            SUCCESS: {
+                LOGIN: '✅ Connexion réussie',
+                REDIRECT: '🔄 Redirection en cours...'
+            },
+            ERROR: {
+                INVALID_EMAIL: '❌ Format email invalide',
+                INVALID_PASSWORD: '❌ Le mot de passe doit contenir au moins 6 caractères',
+                LOGIN_FAILED: '❌ Email ou mot de passe incorrect',
+                PROFILE_NOT_FOUND: '❌ Profil utilisateur introuvable. Contactez un administrateur.',
+                LOAD_ERROR: '❌ Erreur de chargement du profil.',
+                NETWORK_ERROR: '❌ Erreur de connexion. Vérifiez votre connexion internet.'
+            }
+        };
+        
+        // 🔒 Firebase App Check - TEMPORAIREMENT DÉSACTIVÉ
+        // RAISON: Cause des erreurs "network-request-failed" qui bloquent la connexion
+        // TODO: Réactiver après configuration complète dans Firebase Console
+        // Instructions: Voir FIX-ERREUR-FIREBASE-RESEAU.md
+        /*
+        try {
+            const appCheck = initializeAppCheck(app, {
+                provider: new ReCaptchaV3Provider('6LdVPo8qAAAAAJTMf1VMEFhD_pEPe0dKc_B7VF3W'),
+                isTokenAutoRefreshEnabled: true
+            });
+            console.log('✅ App Check activé');
+        } catch (error) {
+            console.warn('⚠️ App Check désactivé (mode dev):', error.message);
+        }
+        */
+        console.log('⚠️ App Check désactivé temporairement pour permettre la connexion');
+        
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // ═══════════════════════════════════════════════════════════════
+        // 🛠️ UTILITY FUNCTIONS (Code Quality Improvement)
+        // ═══════════════════════════════════════════════════════════════
+        
+        /**
+         * Valide un format email
+         * @param {string} email - L'email à valider
+         * @returns {boolean} true si valide
+         */
+        function validateEmail(email) {
+            if (!email || typeof email !== 'string') return false;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email.trim());
+        }
+
+        /**
+         * Valide un mot de passe (minimum 6 caractères)
+         * @param {string} password - Le mot de passe à valider
+         * @returns {boolean} true si valide
+         */
+        function validatePassword(password) {
+            return password && typeof password === 'string' && password.length >= 6;
+        }
+
+        /**
+         * Sanitize une chaîne de caractères
+         * @param {string} str - La chaîne à nettoyer
+         * @returns {string} Chaîne nettoyée
+         */
+        function sanitizeString(str) {
+            if (!str || typeof str !== 'string') return '';
+            return str.trim().replace(/\s+/g, ' ');
+        }
+
+        /**
+         * Log une action utilisateur
+         * @param {string} action - Type d'action
+         * @param {Object} details - Détails de l'action
+         */
+        function logUserAction(action, details) {
+            console.log(`📝 [${new Date().toISOString()}] ${action}:`, details);
+        }
+
+        const loginForm = document.getElementById('login-form');
+        const loginBtn = document.getElementById('login-btn');
+        const loading = document.getElementById('loading');
+        const alertBox = document.getElementById('alert');
+
+        // Vérifier si l'utilisateur est déjà connecté
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                console.log('Utilisateur déjà connecté:', user.email);
+                // Vérifier le rôle et rediriger
+                await checkRoleAndRedirect(user);
+            }
+        });
+
+        /**
+         * Affiche un message d'alerte à l'utilisateur
+         * @param {string} message - Le message à afficher
+         * @param {string} type - Type d'alerte ('error' ou 'success')
+         */
+        function showAlert(message, type = 'error') {
+            alertBox.textContent = message;
+            alertBox.className = `alert alert-${type} show`;
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+            }, 5000);
+        }
+
+        /**
+         * Vérifie le rôle de l'utilisateur et redirige vers la page appropriée
+         * @param {Object} user - L'objet utilisateur Firebase
+         */
+        async function checkRoleAndRedirect(user) {
+            // ✅ CONNEXION RÉUSSIE - Redirection directe (SANS VÉRIFICATION)
+            console.log('✅ Connexion OK:', user.email);
+            sessionStorage.setItem('userEmail', user.email);
+            window.location.href = 'gestion-casiers.html';
+        }
+
+        /**
+         * Gère la soumission du formulaire de connexion avec validation
+         */
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = sanitizeString(document.getElementById('email').value).toLowerCase();
+            const password = document.getElementById('password').value;
+
+            // Validation avec fonctions utilitaires
+            if (!email || !password) {
+                showAlert('⚠️ Veuillez remplir tous les champs.', 'error');
+                return;
+            }
+            
+            if (!validateEmail(email)) {
+                showAlert(MESSAGES.ERROR.INVALID_EMAIL, 'error');
+                return;
+            }
+            
+            if (!validatePassword(password)) {
+                showAlert(MESSAGES.ERROR.INVALID_PASSWORD, 'error');
+                return;
+            }
+
+            // Afficher le chargement
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Connexion...';
+            loading.classList.add('show');
+            alertBox.classList.remove('show');
+
+            try {
+                // Connexion Firebase Authentication
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                logUserAction('LOGIN_SUCCESS', { email: user.email, uid: user.uid });
+                console.log('Connexion réussie:', user.email);
+                showAlert(`${MESSAGES.SUCCESS.LOGIN} ${MESSAGES.SUCCESS.REDIRECT}`, 'success');
+                
+                // Vérifier le rôle et rediriger
+                await checkRoleAndRedirect(user);
+                
+            } catch (error) {
+                console.error('Erreur connexion:', error);
+                
+                let errorMessage = '❌ Erreur de connexion.';
+                
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        errorMessage = MESSAGES.ERROR.INVALID_EMAIL;
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage = '❌ Ce compte a été désactivé. Contactez un administrateur.';
+                        break;
+                    case 'auth/user-not-found':
+                        errorMessage = '❌ Aucun compte trouvé avec cet email.\n\n💡 Solutions :\n• Vérifiez l\'orthographe de l\'email\n• Contactez un administrateur pour créer votre compte';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = '❌ Mot de passe incorrect.\n\n💡 Solutions :\n• Vérifiez votre mot de passe\n• Contactez un administrateur pour le réinitialiser';
+                        break;
+                    case 'auth/invalid-credential':
+                        errorMessage = '❌ Identifiants invalides.\n\n💡 Solutions :\n• Vérifiez votre email ET mot de passe\n• Le compte n\'existe peut-être pas - contactez un administrateur\n• Essayez de réinitialiser le mot de passe dans Firebase Console';
+                        break;
+                    case 'auth/network-request-failed':
+                        errorMessage = '❌ Erreur réseau.\n\n💡 Solutions :\n• Vérifiez votre connexion internet\n• Réessayez dans quelques instants\n• Videz le cache du navigateur (CTRL+F5)';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = '❌ Trop de tentatives échouées.\n\n💡 Solutions :\n• Attendez 15 minutes avant de réessayer\n• Réinitialisez le mot de passe dans Firebase Console';
+                        break;
+                    default:
+                        errorMessage = `❌ Erreur de connexion.\n\nCode: ${error.code}\nMessage: ${error.message}\n\n💡 Contactez un administrateur avec ce code d\'erreur.`;
+                }
+                
+                showAlert(errorMessage, 'error');
+                
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Se connecter';
+                loading.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
