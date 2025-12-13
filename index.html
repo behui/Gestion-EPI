@@ -447,31 +447,36 @@
          * @param {Object} user - L'objet utilisateur Firebase
          */
         async function checkRoleAndRedirect(user) {
+            // ✅ CONNEXION RÉUSSIE - Redirection directe
+            console.log('✅ Connexion Firebase OK - Redirection vers gestion-casiers.html');
+            
+            // Essayer de charger le profil Firestore (optionnel, ne bloque plus)
             try {
                 logUserAction('CHECK_ROLE', { uid: user.uid, email: user.email });
-                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                const userDoc = await getDoc(doc(db, 'users', user.email));
                 
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
-                    console.log('Rôle utilisateur:', userData.role);
+                    console.log('✅ Profil Firestore trouvé:', userData);
                     
                     // Sauvegarder les infos en session
                     sessionStorage.setItem('userEmail', user.email);
-                    sessionStorage.setItem('userRole', userData.role);
+                    sessionStorage.setItem('userRole', userData.role || 'user');
                     sessionStorage.setItem('userName', userData.nom || '');
                     sessionStorage.setItem('userPrenom', userData.prenom || '');
-                    
-                    // Redirection
-                    window.location.href = 'gestion-casiers.html';
                 } else {
-                    // Utilisateur Firebase sans profil Firestore
-                    showAlert(MESSAGES.ERROR.PROFILE_NOT_FOUND, 'error');
-                    await auth.signOut();
+                    console.log('⚠️ Profil Firestore non trouvé, mais connexion autorisée');
+                    sessionStorage.setItem('userEmail', user.email);
+                    sessionStorage.setItem('userRole', 'user');
                 }
             } catch (error) {
-                console.error('Erreur vérification rôle:', error);
-                showAlert(MESSAGES.ERROR.LOAD_ERROR, 'error');
+                console.warn('⚠️ Erreur chargement profil (non bloquant):', error);
+                sessionStorage.setItem('userEmail', user.email);
+                sessionStorage.setItem('userRole', 'user');
             }
+            
+            // Redirection TOUJOURS effectuée
+            window.location.href = 'gestion-casiers.html';
         }
 
         /**
