@@ -765,14 +765,25 @@
                 
                 // VÉRIFICATION ADMIN OBLIGATOIRE
                 if (!userDoc.exists()) {
-                    alert('⛔ Accès refusé : Profil utilisateur introuvable');
-                    window.location.href = 'gestion-casiers.html';
+                    console.error('⛔ Profil Firestore introuvable pour:', user.email);
+                    alert('⛔ Profil introuvable dans Firestore.\n\n' +
+                          '📝 Allez sur Firebase Console → Firestore → Collection "users"\n' +
+                          '➕ Créez un document avec ID: ' + user.email + '\n' +
+                          '📋 Ajoutez les champs: prenom, nom, email, role: "admin"\n\n' +
+                          '🔗 https://console.firebase.google.com/project/gestion-epi-4387a/firestore/data');
+                    window.location.href = 'index.html';
                     return;
                 }
                 
                 const userData = userDoc.data();
-                if (userData.role !== USER_ROLES.ADMIN) {
-                    alert('⛔ Accès refusé : Cette page est réservée aux administrateurs');
+                console.log('📋 Données utilisateur:', userData);
+                
+                if (!userData.role || userData.role !== USER_ROLES.ADMIN) {
+                    console.error('⛔ Rôle insuffisant:', userData.role);
+                    alert('⛔ Accès refusé : Cette page est réservée aux administrateurs\n\n' +
+                          'Votre rôle actuel: ' + (userData.role || 'non défini') + '\n' +
+                          'Rôle requis: admin\n\n' +
+                          '🔧 Contactez un administrateur pour modifier votre rôle.');
                     window.location.href = 'gestion-casiers.html';
                     return;
                 }
