@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Casiers PPVE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-role {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .control-group input,
+        .control-group select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .control-group input:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .locker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .locker {
+            aspect-ratio: 1;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            padding: 5px;
+        }
+
+        .locker:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .locker.occupied {
+            background: #fee;
+            border-color: #fcc;
+        }
+
+        .locker.available {
+            background: #efe;
+            border-color: #cfc;
+        }
+
+        .locker-number {
+            font-weight: 700;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .locker-status {
+            font-size: 10px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .locker-user {
+            font-size: 9px;
+            color: #888;
+            text-align: center;
+            margin-top: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #333;
+            font-size: 22px;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #5a6268;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔒 Gestion Casiers PPVE</h1>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-name" id="userName">Chargement...</div>
+                <div class="user-role" id="userRole"></div>
+            </div>
+            <button class="btn btn-secondary" onclick="window.location.href='Antho.html'">📦 Équipements</button>
+            <button class="btn btn-secondary" id="adminButton" style="display: none;" onclick="window.location.href='admin-test.html'">⚙️ Admin</button>
+            <button class="btn btn-danger" onclick="logout()">Déconnexion</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalLockers">288</div>
+                <div class="stat-label">Total Casiers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="occupiedLockers">0</div>
+                <div class="stat-label">Occupés</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="availableLockers">288</div>
+                <div class="stat-label">Disponibles</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label>🔍 Rechercher</label>
+                    <input type="text" id="searchInput" placeholder="Numéro, matricule, nom...">
+                </div>
+                <div class="control-group">
+                    <label>📊 Filtrer</label>
+                    <select id="filterStatus">
+                        <option value="all">Tous les casiers</option>
+                        <option value="available">Disponibles</option>
+                        <option value="occupied">Occupés</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+
+        <div class="locker-grid" id="lockerGrid"></div>
+    </div>
+
+    <div id="lockerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Casier #<span id="modalLockerNumber"></span></h2>
+            </div>
+            <div class="modal-body">
+                <div id="modalError" class="error-message"></div>
+                <div id="modalSuccess" class="success-message"></div>
+                
+                <div class="form-group">
+                    <label>Matricule</label>
+                    <input type="text" id="matricule" placeholder="Ex: 12345">
+                </div>
+                <div class="form-group">
+                    <label>Nom</label>
+                    <input type="text" id="nom" placeholder="Nom de l'employé">
+                </div>
+                <div class="form-group">
+                    <label>Prénom</label>
+                    <input type="text" id="prenom" placeholder="Prénom de l'employé">
+                </div>
+                <div class="form-group">
+                    <label>Notes (optionnel)</label>
+                    <textarea id="notes" placeholder="Informations complémentaires..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" onclick="closeModal()">Annuler</button>
+                <button class="btn btn-danger" id="btnLiberer" style="display:none;" onclick="libererCasier()">Libérer</button>
+                <button class="btn btn-primary" id="btnAttribuer" onclick="attribuerCasier()">Attribuer</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMPBik5vpX8qOYWuhPzpJZoOLjE20pl6g",
+            authDomain: "gestion-epi-4387a.firebaseapp.com",
+            projectId: "gestion-epi-4387a",
+            storageBucket: "gestion-epi-4387a.firebasestorage.app",
+            messagingSenderId: "974706767408",
+            appId: "1:974706767408:web:fde01e52a3a986d6da9ff5",
+            measurementId: "G-PKNXH32P0Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let currentLocker = null;
+        let casiers = {};
+
+        window.logout = async function() {
+            if (confirm('Voulez-vous vraiment vous déconnecter?')) {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            }
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (!userDoc.exists() || !userDoc.data().active) {
+                    await signOut(auth);
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                currentUser = userDoc.data();
+                document.getElementById('userName').textContent = currentUser.name || user.email;
+                document.getElementById('userRole').textContent = currentUser.role || 'Utilisateur';
+
+                if (currentUser.role === 'admin' || currentUser.role === 'superadmin') {
+                    document.getElementById('adminButton').style.display = 'block';
+                }
+
+                await loadCasiers();
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError('Erreur de chargement des données');
+            }
+        });
+
+        async function loadCasiers() {
+            try {
+                const casiersDoc = await getDoc(doc(db, 'casiers', 'data'));
+                if (casiersDoc.exists()) {
+                    casiers = casiersDoc.data() || {};
+                }
+                renderCasiers();
+            } catch (error) {
+                console.error('Erreur chargement casiers:', error);
+                showError('Erreur lors du chargement des casiers');
+            }
+        }
+
+        function renderCasiers() {
+            const grid = document.getElementById('lockerGrid');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filterStatus = document.getElementById('filterStatus').value;
+
+            grid.innerHTML = '';
+
+            let occupied = 0;
+            let available = 0;
+
+            for (let i = 1; i <= 288; i++) {
+                const casier = casiers[i] || { occupied: false };
+                const isOccupied = casier.occupied;
+
+                if (isOccupied) occupied++;
+                else available++;
+
+                if (filterStatus === 'available' && isOccupied) continue;
+                if (filterStatus === 'occupied' && !isOccupied) continue;
+
+                if (searchTerm) {
+                    const searchText = `${i} ${casier.matricule || ''} ${casier.nom || ''} ${casier.prenom || ''}`.toLowerCase();
+                    if (!searchText.includes(searchTerm)) continue;
+                }
+
+                const div = document.createElement('div');
+                div.className = `locker ${isOccupied ? 'occupied' : 'available'}`;
+                div.onclick = () => openModal(i);
+
+                div.innerHTML = `
+                    <div class="locker-number">${i}</div>
+                    <div class="locker-status">${isOccupied ? '🔴 Occupé' : '🟢 Libre'}</div>
+                    ${isOccupied && casier.nom ? `<div class="locker-user">${casier.nom}</div>` : ''}
+                `;
+
+                grid.appendChild(div);
+            }
+
+            document.getElementById('occupiedLockers').textContent = occupied;
+            document.getElementById('availableLockers').textContent = available;
+        }
+
+        window.openModal = function(number) {
+            if (!currentUser.editCasiers && currentUser.role !== 'admin' && currentUser.role !== 'superadmin') {
+                showError('Vous n\'avez pas la permission de modifier les casiers');
+                return;
+            }
+
+            currentLocker = number;
+            const casier = casiers[number] || { occupied: false };
+
+            document.getElementById('modalLockerNumber').textContent = number;
+            document.getElementById('matricule').value = casier.matricule || '';
+            document.getElementById('nom').value = casier.nom || '';
+            document.getElementById('prenom').value = casier.prenom || '';
+            document.getElementById('notes').value = casier.notes || '';
+
+            if (casier.occupied) {
+                document.getElementById('btnLiberer').style.display = 'block';
+                document.getElementById('btnAttribuer').textContent = 'Modifier';
+            } else {
+                document.getElementById('btnLiberer').style.display = 'none';
+                document.getElementById('btnAttribuer').textContent = 'Attribuer';
+            }
+
+            document.getElementById('lockerModal').classList.add('show');
+        };
+
+        window.closeModal = function() {
+            document.getElementById('lockerModal').classList.remove('show');
+            document.getElementById('modalError').style.display = 'none';
+            document.getElementById('modalSuccess').style.display = 'none';
+        };
+
+        window.attribuerCasier = async function() {
+            const matricule = document.getElementById('matricule').value.trim();
+            const nom = document.getElementById('nom').value.trim();
+            const prenom = document.getElementById('prenom').value.trim();
+            const notes = document.getElementById('notes').value.trim();
+
+            if (!matricule || !nom || !prenom) {
+                showModalError('Veuillez remplir tous les champs obligatoires');
+                return;
+            }
+
+            try {
+                casiers[currentLocker] = {
+                    occupied: true,
+                    matricule,
+                    nom,
+                    prenom,
+                    notes,
+                    date: new Date().toISOString(),
+                    modifiedBy: currentUser.name || auth.currentUser.email
+                };
+
+                await setDoc(doc(db, 'casiers', 'data'), casiers);
+                showModalSuccess('Casier attribué avec succès!');
+                
+                setTimeout(() => {
+                    closeModal();
+                    renderCasiers();
+                }, 1000);
+            } catch (error) {
+                console.error('Erreur attribution:', error);
+                showModalError('Erreur lors de l\'attribution');
+            }
+        };
+
+        window.libererCasier = async function() {
+            if (!confirm('Voulez-vous vraiment libérer ce casier?')) return;
+
+            try {
+                delete casiers[currentLocker];
+                await setDoc(doc(db, 'casiers', 'data'), casiers);
+                
+                showModalSuccess('Casier libéré avec succès!');
+                setTimeout(() => {
+                    closeModal();
+                    renderCasiers();
+                }, 1000);
+            } catch (error) {
+                console.error('Erreur libération:', error);
+                showModalError('Erreur lors de la libération');
+            }
+        };
+
+        function showError(message) {
+            const el = document.getElementById('errorMessage');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
+
+        function showSuccess(message) {
+            const el = document.getElementById('successMessage');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
+
+        function showModalError(message) {
+            const el = document.getElementById('modalError');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
+
+        function showModalSuccess(message) {
+            const el = document.getElementById('modalSuccess');
+            el.textContent = message;
+            el.style.display = 'block';
+        }
+
+        document.getElementById('searchInput').addEventListener('input', renderCasiers);
+        document.getElementById('filterStatus').addEventListener('change', renderCasiers);
+
+        document.getElementById('lockerModal').addEventListener('click', (e) => {
+            if (e.target.id === 'lockerModal') closeModal();
+        });
+    </script>
+</body>
+</html>
