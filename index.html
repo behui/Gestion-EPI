@@ -133,6 +133,28 @@
             <div id="equipements-app"></div>
         </div>
     </div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h1>PPVE Digit 2.0</h1>
+            <p>Gestion Industrielle</p>
+        </div>
+        <nav class="nav-menu">
+            <button class="nav-link" onclick="showSection('dashboard')">🏠 Dashboard</button>
+            <button class="nav-link" onclick="showSection('casiers')">🗄️ Casiers</button>
+            <button class="nav-link" onclick="showSection('equipements')">📦 Équipements</button>
+            <button class="nav-link" onclick="showSection('users')">👤 Utilisateurs</button>
+            <button class="nav-link" onclick="showSection('admin')">🛠️ Admin</button>
+            <button class="nav-link" onclick="showSection('tools')">🧰 Outils</button>
+        </nav>
+    </div>
+    <div class="main-content" id="main-content">
+        <div id="section-dashboard" class="section active"></div>
+        <div id="section-casiers" class="section"></div>
+        <div id="section-equipements" class="section"></div>
+        <div id="section-users" class="section"></div>
+        <div id="section-admin" class="section"></div>
+        <div id="section-tools" class="section"></div>
+    </div>
     <script src="unified-app.js"></script>
 </body>
 </html>
