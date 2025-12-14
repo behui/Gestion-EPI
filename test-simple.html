@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='UTF-8'>
+    <title>Test Suppression</title>
+</head>
+<body>
+    <h1>Test de suppression directe</h1>
+    <button onclick='testDelete()'> Test Supprimer</button>
+    
+    <script type='module'>
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, deleteDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: 'AIzaSyDMPBik5vpX8qOYWuhPzpJZoOLjE20pl6g',
+            authDomain: 'gestion-epi-4387a.firebaseapp.com',
+            projectId: 'gestion-epi-4387a',
+            storageBucket: 'gestion-epi-4387a.firebasestorage.app',
+            messagingSenderId: '974706767408',
+            appId: '1:974706767408:web:fde01e52a3a986d6da9ff5',
+            measurementId: 'G-PKNXH32P0Z'
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.testDelete = async function() {
+            console.log(' Fonction testDelete appelée - AUCUNE POPUP!');
+            alert(' Suppression directe fonctionne! Pas de popup SUPPRIMER.');
+        };
+
+        console.log(' Script chargé, fonction testDelete disponible');
+    </script>
+</body>
+</html>

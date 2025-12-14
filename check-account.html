@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Vérifier Compte</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .result {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .error { color: #e74c3c; }
+        .success { color: #27ae60; }
+        .info { color: #3498db; }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Vérification du Compte</h1>
+    
+    <div>
+        <input type="text" id="emailInput" placeholder="Anthony.FERNANDEZ@axensgroup.com" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 5px;">
+        <button onclick="checkAccount()">Vérifier le Compte</button>
+        <button onclick="listAllUsers()">Lister Tous les Comptes</button>
+        <button onclick="createProfile()">Créer Profil Firestore</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, fetchSignInMethodsForEmail } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, doc, getDoc, getDocs, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMPBik5vpX8qOYWuhPzpJZoOLjE20pl6g",
+            authDomain: "gestion-epi-4387a.firebaseapp.com",
+            projectId: "gestion-epi-4387a",
+            storageBucket: "gestion-epi-4387a.firebasestorage.app",
+            messagingSenderId: "974706767408",
+            appId: "1:974706767408:web:fde01e52a3a986d6da9ff5",
+            measurementId: "G-PKNXH32P0Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = message;
+            document.getElementById('results').appendChild(div);
+        }
+
+        window.checkAccount = async function() {
+            document.getElementById('results').innerHTML = '';
+            const email = document.getElementById('emailInput').value.trim();
+            
+            if (!email) {
+                log('⚠️ Entrez un email', 'error');
+                return;
+            }
+
+            log(`<h3>🔍 Vérification de: ${email}</h3>`, 'info');
+
+            try {
+                // 1. Vérifier dans Authentication
+                log('📧 Vérification Firebase Authentication...', 'info');
+                const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+                
+                if (signInMethods.length > 0) {
+                    log(`✅ Compte existe dans Authentication<br>Méthodes: ${signInMethods.join(', ')}`, 'success');
+                } else {
+                    log('❌ Compte N\'EXISTE PAS dans Authentication', 'error');
+                    log('👉 Utilisez setup-admin.html pour créer le compte', 'info');
+                    return;
+                }
+
+                // 2. Chercher dans Firestore users collection
+                log('<br>📁 Vérification Firestore collection users...', 'info');
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                
+                let foundInFirestore = false;
+                let userData = null;
+                let userId = null;
+
+                usersSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.email === email) {
+                        foundInFirestore = true;
+                        userData = data;
+                        userId = doc.id;
+                    }
+                });
+
+                if (foundInFirestore) {
+                    log(`✅ Profil trouvé dans Firestore<br>UID: ${userId}`, 'success');
+                    log(`<pre>${JSON.stringify(userData, null, 2)}</pre>`, 'info');
+                } else {
+                    log('❌ Profil N\'EXISTE PAS dans Firestore', 'error');
+                    log('⚠️ Le compte existe dans Authentication mais pas de profil Firestore!', 'error');
+                    log('👉 Cliquez sur "Créer Profil Firestore" ci-dessus', 'info');
+                }
+
+            } catch (error) {
+                log(`❌ Erreur: ${error.message}<br>Code: ${error.code}`, 'error');
+                console.error(error);
+            }
+        };
+
+        window.listAllUsers = async function() {
+            document.getElementById('results').innerHTML = '';
+            log('<h3>👥 Liste de tous les comptes Firestore</h3>', 'info');
+
+            try {
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                
+                if (usersSnapshot.empty) {
+                    log('⚠️ Aucun utilisateur dans Firestore', 'error');
+                    return;
+                }
+
+                log(`📊 ${usersSnapshot.size} compte(s) trouvé(s):<br><br>`, 'success');
+
+                usersSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    log(`
+                        <strong>UID:</strong> ${doc.id}<br>
+                        <strong>Email:</strong> ${data.email}<br>
+                        <strong>Nom:</strong> ${data.prenom} ${data.nom}<br>
+                        <strong>Rôle:</strong> ${data.role}<br>
+                        <strong>Créé le:</strong> ${data.createdAt || 'N/A'}<br>
+                        <hr>
+                    `, 'info');
+                });
+
+            } catch (error) {
+                log(`❌ Erreur: ${error.message}`, 'error');
+                console.error(error);
+            }
+        };
+
+        window.createProfile = async function() {
+            const email = document.getElementById('emailInput').value.trim();
+            
+            if (!email) {
+                log('⚠️ Entrez un email', 'error');
+                return;
+            }
+
+            log(`<h3>🔧 Création du profil Firestore pour ${email}</h3>`, 'info');
+
+            try {
+                // Récupérer l'UID depuis Authentication
+                log('📧 Recherche de l\'UID...', 'info');
+                
+                // Note: On ne peut pas facilement récupérer l'UID sans être connecté
+                // On va créer avec un UID basé sur l'email
+                const emailClean = email.replace(/[@.]/g, '_');
+                const fakeUid = `manual_${emailClean}`;
+
+                log('⚠️ Impossible de récupérer l\'UID automatiquement', 'error');
+                log('📝 Vous devez aller sur Firebase Console:', 'info');
+                log(`
+                    <ol>
+                        <li>Allez sur <a href="https://console.firebase.google.com/project/gestion-epi-4387a/authentication/users" target="_blank">Firebase Authentication</a></li>
+                        <li>Cherchez ${email}</li>
+                        <li>Copiez l'<strong>UID</strong></li>
+                        <li>Allez sur <a href="https://console.firebase.google.com/project/gestion-epi-4387a/firestore/data" target="_blank">Firestore</a></li>
+                        <li>Collection: <strong>users</strong></li>
+                        <li>Document ID: <strong>[collez l'UID]</strong></li>
+                        <li>Ajoutez les champs:<br>
+                            <pre>
+email: Anthony.FERNANDEZ@axensgroup.com
+prenom: Anthony
+nom: FERNANDEZ
+role: admin
+createdAt: ${new Date().toISOString()}
+                            </pre>
+                        </li>
+                    </ol>
+                `, 'info');
+
+            } catch (error) {
+                log(`❌ Erreur: ${error.message}`, 'error');
+                console.error(error);
+            }
+        };
+
+        // Auto-check au chargement
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('emailInput').value = 'Anthony.FERNANDEZ@axensgroup.com';
+        });
+    </script>
+</body>
+</html>

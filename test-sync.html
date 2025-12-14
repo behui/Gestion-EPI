@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Synchronisation Firebase - 2 Utilisateurs</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .user-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .user1 { border-top: 5px solid #4CAF50; }
+        .user2 { border-top: 5px solid #2196F3; }
+        h2 {
+            margin-bottom: 20px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-create { background: #FF9800; color: white; }
+        .btn-activate { background: #F44336; color: white; }
+        .btn-deactivate { background: #9E9E9E; color: white; }
+        .btn-reload { background: #2196F3; color: white; }
+        button:hover { opacity: 0.8; transform: translateY(-2px); }
+        .log {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 3px 0;
+        }
+        .log-success { color: #66bb6a; }
+        .log-error { color: #ef5350; }
+        .log-warning { color: #ffa726; }
+        .log-info { color: #42a5f5; }
+        .casiers-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .casier-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            border-left: 3px solid #F44336;
+            font-size: 13px;
+        }
+        .header-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            grid-column: 1 / -1;
+        }
+        .sync-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .sync-ok { background: #4CAF50; color: white; }
+        .sync-error { background: #F44336; color: white; }
+    </style>
+</head>
+<body>
+    <div class="header-title">
+        <h1>🔄 Test de Synchronisation Firebase - Simulation 2 Utilisateurs</h1>
+        <p>Testez les actions sur les deux panneaux et vérifiez la synchronisation en temps réel</p>
+    </div>
+
+    <div class="container">
+        <!-- USER 1 -->
+        <div class="user-panel user1">
+            <h2>👤 Utilisateur 1 <span class="sync-status sync-ok" id="sync1">● Connecté</span></h2>
+            
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">🟢 Libres</div>
+                    <div class="stat-value" id="libre1">-</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">🟠 Attente</div>
+                    <div class="stat-value" id="attente1">-</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">🔴 Occupés</div>
+                    <div class="stat-value" id="occupe1">-</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">⚫ Inactifs</div>
+                    <div class="stat-value" id="inactif1">-</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-create" onclick="user1CreateAttente()">🟠 Créer casier EN ATTENTE (C01)</button>
+                <button class="btn-activate" onclick="user1ActivateCasier()">✅ Activer un casier (→ OCCUPÉ)</button>
+                <button class="btn-deactivate" onclick="user1DeactivateCasier()">🔓 Désactiver un casier (→ INACTIF)</button>
+                <button class="btn-reload" onclick="user1Reload()">🔄 Recharger depuis Firebase</button>
+            </div>
+
+            <h4>Casiers OCCUPÉS :</h4>
+            <div class="casiers-list" id="casiers1"></div>
+
+            <div class="log" id="log1"></div>
+        </div>
+
+        <!-- USER 2 -->
+        <div class="user-panel user2">
+            <h2>👤 Utilisateur 2 <span class="sync-status sync-ok" id="sync2">● Connecté</span></h2>
+            
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">🟢 Libres</div>
+                    <div class="stat-value" id="libre2">-</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">🟠 Attente</div>
+                    <div class="stat-value" id="attente2">-</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">🔴 Occupés</div>
+                    <div class="stat-value" id="occupe2">-</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">⚫ Inactifs</div>
+                    <div class="stat-value" id="inactif2">-</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-create" onclick="user2CreateAttente()">🟠 Créer casier EN ATTENTE (C02)</button>
+                <button class="btn-activate" onclick="user2ActivateCasier()">✅ Activer un casier (→ OCCUPÉ)</button>
+                <button class="btn-deactivate" onclick="user2DeactivateCasier()">🔓 Désactiver un casier (→ INACTIF)</button>
+                <button class="btn-reload" onclick="user2Reload()">🔄 Recharger depuis Firebase</button>
+            </div>
+
+            <h4>Casiers OCCUPÉS :</h4>
+            <div class="casiers-list" id="casiers2"></div>
+
+            <div class="log" id="log2"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMPBik5vpX8qOYWuhPzpJZoOLjE20pl6g",
+            authDomain: "gestion-epi-4387a.firebaseapp.com",
+            projectId: "gestion-epi-4387a",
+            storageBucket: "gestion-epi-4387a.firebasestorage.app",
+            messagingSenderId: "974706767408",
+            appId: "1:974706767408:web:fde01e52a3a986d6da9ff5",
+            measurementId: "G-PKNXH32P0Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        let user1Data = [];
+        let user2Data = [];
+        let user1IsLocalUpdate = false;
+        let user2IsLocalUpdate = false;
+
+        // ========== LOGGING ==========
+        function log(user, message, type = 'info') {
+            const logEl = document.getElementById(`log${user}`);
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${time}] ${message}`;
+            logEl.insertBefore(entry, logEl.firstChild);
+            
+            // Garder seulement les 50 derniers logs
+            while (logEl.children.length > 50) {
+                logEl.removeChild(logEl.lastChild);
+            }
+        }
+
+        // ========== LOAD DATA ==========
+        async function loadData(user) {
+            try {
+                log(user, '🔄 Chargement depuis Firebase...', 'info');
+                const docRef = doc(db, 'casiers', 'data');
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (user === 1) {
+                        user1Data = data.lockers || [];
+                    } else {
+                        user2Data = data.lockers || [];
+                    }
+                    log(user, `✅ ${data.lockers.length} casiers chargés`, 'success');
+                    updateStats(user);
+                    renderCasiers(user);
+                    return true;
+                }
+                log(user, '⚠️ Aucune donnée dans Firebase', 'warning');
+                return false;
+            } catch (error) {
+                log(user, `❌ Erreur: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        // ========== SAVE DATA ==========
+        async function saveData(user) {
+            try {
+                if (user === 1) user1IsLocalUpdate = true;
+                else user2IsLocalUpdate = true;
+
+                log(user, '💾 Sauvegarde dans Firebase...', 'info');
+                const data = user === 1 ? user1Data : user2Data;
+                
+                await setDoc(doc(db, 'casiers', 'data'), {
+                    lockers: data,
+                    lastUpdate: new Date().toISOString()
+                });
+                
+                log(user, '✅ Données sauvegardées dans Firebase', 'success');
+                updateStats(user);
+                renderCasiers(user);
+            } catch (error) {
+                log(user, `❌ Erreur sauvegarde: ${error.message}`, 'error');
+                if (user === 1) user1IsLocalUpdate = false;
+                else user2IsLocalUpdate = false;
+            }
+        }
+
+        // ========== STATS ==========
+        function updateStats(user) {
+            const data = user === 1 ? user1Data : user2Data;
+            const stats = {
+                libre: data.filter(l => l.statut === 'LIBRE').length,
+                attente: data.filter(l => l.statut === 'EN ATTENTE').length,
+                occupe: data.filter(l => l.statut === 'OCCUPÉ').length,
+                inactif: data.filter(l => l.statut === 'INACTIF').length
+            };
+            
+            document.getElementById(`libre${user}`).textContent = stats.libre;
+            document.getElementById(`attente${user}`).textContent = stats.attente;
+            document.getElementById(`occupe${user}`).textContent = stats.occupe;
+            document.getElementById(`inactif${user}`).textContent = stats.inactif;
+        }
+
+        // ========== RENDER CASIERS ==========
+        function renderCasiers(user) {
+            const data = user === 1 ? user1Data : user2Data;
+            const container = document.getElementById(`casiers${user}`);
+            const occupes = data.filter(l => l.statut === 'OCCUPÉ');
+            
+            if (occupes.length === 0) {
+                container.innerHTML = '<div style="text-align:center;color:#999;padding:20px;">Aucun casier occupé</div>';
+                return;
+            }
+            
+            container.innerHTML = occupes.map(l => `
+                <div class="casier-item">
+                    <strong>${l.id}</strong> - ${l.prenom} ${l.nom} | 🎭 ${l.refMasque}
+                </div>
+            `).join('');
+        }
+
+        // ========== ACTIONS USER 1 ==========
+        window.user1CreateAttente = async function() {
+            const locker = user1Data.find(l => l.id === 'C01');
+            if (!locker) {
+                log(1, '❌ Casier C01 non trouvé', 'error');
+                return;
+            }
+            
+            locker.statut = 'EN ATTENTE';
+            locker.prenom = 'Jean';
+            locker.nom = 'Dupont';
+            locker.refMasque = 'MASK-001';
+            locker.refTuyau = 'TUBE-001';
+            locker.date = new Date().toLocaleDateString('fr-FR');
+            
+            log(1, '🟠 Création casier C01 EN ATTENTE', 'warning');
+            await saveData(1);
+        };
+
+        window.user1ActivateCasier = async function() {
+            const locker = user1Data.find(l => l.statut === 'EN ATTENTE');
+            if (!locker) {
+                log(1, '⚠️ Aucun casier en attente', 'warning');
+                return;
+            }
+            
+            locker.statut = 'OCCUPÉ';
+            log(1, `✅ Activation casier ${locker.id} → OCCUPÉ`, 'success');
+            await saveData(1);
+        };
+
+        window.user1DeactivateCasier = async function() {
+            const locker = user1Data.find(l => l.statut === 'OCCUPÉ');
+            if (!locker) {
+                log(1, '⚠️ Aucun casier occupé', 'warning');
+                return;
+            }
+            
+            locker.statut = 'INACTIF';
+            log(1, `⚫ Désactivation casier ${locker.id} → INACTIF`, 'info');
+            await saveData(1);
+        };
+
+        window.user1Reload = async function() {
+            await loadData(1);
+        };
+
+        // ========== ACTIONS USER 2 ==========
+        window.user2CreateAttente = async function() {
+            const locker = user2Data.find(l => l.id === 'C02');
+            if (!locker) {
+                log(2, '❌ Casier C02 non trouvé', 'error');
+                return;
+            }
+            
+            locker.statut = 'EN ATTENTE';
+            locker.prenom = 'Marie';
+            locker.nom = 'Martin';
+            locker.refMasque = 'MASK-002';
+            locker.refTuyau = 'TUBE-002';
+            locker.date = new Date().toLocaleDateString('fr-FR');
+            
+            log(2, '🟠 Création casier C02 EN ATTENTE', 'warning');
+            await saveData(2);
+        };
+
+        window.user2ActivateCasier = async function() {
+            const locker = user2Data.find(l => l.statut === 'EN ATTENTE');
+            if (!locker) {
+                log(2, '⚠️ Aucun casier en attente', 'warning');
+                return;
+            }
+            
+            locker.statut = 'OCCUPÉ';
+            log(2, `✅ Activation casier ${locker.id} → OCCUPÉ`, 'success');
+            await saveData(2);
+        };
+
+        window.user2DeactivateCasier = async function() {
+            const locker = user2Data.find(l => l.statut === 'OCCUPÉ');
+            if (!locker) {
+                log(2, '⚠️ Aucun casier occupé', 'warning');
+                return;
+            }
+            
+            locker.statut = 'INACTIF';
+            log(2, `⚫ Désactivation casier ${locker.id} → INACTIF`, 'info');
+            await saveData(2);
+        };
+
+        window.user2Reload = async function() {
+            await loadData(2);
+        };
+
+        // ========== REAL-TIME SYNC ==========
+        function setupSync(user) {
+            const docRef = doc(db, 'casiers', 'data');
+            let isFirst = true;
+            
+            onSnapshot(docRef, (snapshot) => {
+                // Ignorer le premier snapshot
+                if (isFirst) {
+                    isFirst = false;
+                    log(user, '🎯 Synchronisation temps réel activée', 'success');
+                    return;
+                }
+                
+                // Ignorer si c'est notre propre update
+                if (user === 1 && user1IsLocalUpdate) {
+                    user1IsLocalUpdate = false;
+                    return;
+                }
+                if (user === 2 && user2IsLocalUpdate) {
+                    user2IsLocalUpdate = false;
+                    return;
+                }
+                
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    const oldData = user === 1 ? JSON.stringify(user1Data) : JSON.stringify(user2Data);
+                    const newData = JSON.stringify(data.lockers);
+                    
+                    if (oldData !== newData) {
+                        log(user, '🔄 Mise à jour reçue d\'un autre utilisateur!', 'info');
+                        if (user === 1) {
+                            user1Data = data.lockers;
+                        } else {
+                            user2Data = data.lockers;
+                        }
+                        updateStats(user);
+                        renderCasiers(user);
+                    }
+                }
+            }, (error) => {
+                log(user, `❌ Erreur sync: ${error.message}`, 'error');
+                document.getElementById(`sync${user}`).className = 'sync-status sync-error';
+                document.getElementById(`sync${user}`).textContent = '● Erreur';
+            });
+        }
+
+        // ========== INIT ==========
+        async function init() {
+            console.log('🚀 Initialisation test synchronisation...');
+            
+            // Attendre Firebase
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Charger données pour les 2 utilisateurs
+            await loadData(1);
+            await loadData(2);
+            
+            // Activer sync temps réel
+            await new Promise(resolve => setTimeout(resolve, 300));
+            setupSync(1);
+            setupSync(2);
+            
+            log(1, '✅ Utilisateur 1 prêt', 'success');
+            log(2, '✅ Utilisateur 2 prêt', 'success');
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

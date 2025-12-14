@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Réparer Profils Firestore Manquants</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .info {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 2px solid #ffc107;
+        }
+
+        .user-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .user-item.fixed {
+            border-left-color: #27ae60;
+            background: #e8f5e9;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        #result {
+            margin-top: 20px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .permissions-section {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .permissions-section.show {
+            display: block;
+        }
+
+        .permissions-section h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+            margin-bottom: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            margin: 0 !important;
+            font-weight: normal !important;
+        }
+
+        .btn-modal {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Réparer Profils Firestore Manquants</h1>
+        
+        <div class="info">
+            <strong>ℹ️ Cet outil va:</strong><br>
+            1. Lister tous les comptes Authentication<br>
+            2. Vérifier quels profils Firestore sont manquants<br>
+            3. Créer les profils manquants
+        </div>
+
+        <button class="btn" onclick="scanUsers()">🔍 Scanner les Utilisateurs</button>
+
+        <div id="result"></div>
+    </div>
+
+    <!-- Modal de création de profil -->
+    <div id="create-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="color: #667eea; margin: 0;">➕ Créer un Profil Utilisateur</h2>
+            </div>
+
+            <form id="create-profile-form">
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="text" id="modal-email" readonly style="background: #f0f0f0;">
+                </div>
+
+                <div class="form-group">
+                    <label>Prénom *</label>
+                    <input type="text" id="modal-prenom" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Nom *</label>
+                    <input type="text" id="modal-nom" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Rôle *</label>
+                    <select id="modal-role" onchange="togglePermissionsModal()">
+                        <option value="utilisateur">👤 Utilisateur</option>
+                        <option value="admin">🔑 Administrateur</option>
+                    </select>
+                </div>
+
+                <!-- Permissions (visible seulement pour utilisateur) -->
+                <div id="modal-permissions" class="permissions-section show">
+                    <h4>⚙️ Permissions Supplémentaires</h4>
+                    <p style="font-size: 0.85em; color: #666; margin-bottom: 10px;">
+                        Par défaut, l'utilisateur n'a accès qu'à l'espace utilisateur. Cochez pour donner plus de droits:
+                    </p>
+                    
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="modal-perm-view-casiers">
+                        <label for="modal-perm-view-casiers">
+                            <strong>📦 Vue d'ensemble Casiers</strong><br>
+                            <small style="color: #666;">Consulter les casiers (lecture seule)</small>
+                        </label>
+                    </div>
+
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="modal-perm-edit-casiers">
+                        <label for="modal-perm-edit-casiers">
+                            <strong>✏️ Modifier les Casiers</strong><br>
+                            <small style="color: #666;">Attribuer/Libérer des casiers</small>
+                        </label>
+                    </div>
+
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="modal-perm-view-equipements">
+                        <label for="modal-perm-view-equipements">
+                            <strong>🎭 Gestion Équipements</strong><br>
+                            <small style="color: #666;">Voir les équipements</small>
+                        </label>
+                    </div>
+
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="modal-perm-edit-equipements">
+                        <label for="modal-perm-edit-equipements">
+                            <strong>✏️ Modifier Équipements</strong><br>
+                            <small style="color: #666;">Gérer stock/maintenance</small>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; text-align: right;">
+                    <button type="button" class="btn-modal btn-cancel" onclick="closeModal()">
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn-modal">
+                        ✅ Créer le Profil
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, getDocs, doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMPBik5vpX8qOYWuhPzpJZoOLjE20pl6g",
+            authDomain: "gestion-epi-4387a.firebaseapp.com",
+            projectId: "gestion-epi-4387a",
+            storageBucket: "gestion-epi-4387a.firebasestorage.app",
+            messagingSenderId: "974706767408",
+            appId: "1:974706767408:web:fde01e52a3a986d6da9ff5",
+            measurementId: "G-PKNXH32P0Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Vérifier que l'utilisateur est connecté
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                alert('❌ Vous devez être connecté en tant qu\'admin.');
+                window.location.href = 'login.html';
+            }
+        });
+
+        window.scanUsers = async function() {
+            const result = document.getElementById('result');
+            result.innerHTML = '<p>⏳ Scan en cours...</p>';
+
+            try {
+                // Liste des utilisateurs Authentication connus
+                const authUsers = [
+                    {
+                        uid: '2CCB5DQdFhgpek51Q3VF2lJ8mK72',
+                        email: 'anthony.fernandez@axensgroup.com'
+                    },
+                    {
+                        uid: 'bBZhRkPONCSsbDcQ7jzQ9lIT...',
+                        email: 'mickael.amat@axensgroup.com'
+                    }
+                ];
+
+                // Récupérer tous les profils Firestore
+                const firestoreSnapshot = await getDocs(collection(db, 'users'));
+                const firestoreEmails = new Set();
+                firestoreSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.email) {
+                        firestoreEmails.add(data.email.toLowerCase());
+                    }
+                });
+
+                // Trouver les utilisateurs manquants
+                const missing = authUsers.filter(u => !firestoreEmails.has(u.email.toLowerCase()));
+
+                if (missing.length === 0) {
+                    result.innerHTML = `
+                        <div class="user-item fixed">
+                            <h3>✅ Tous les profils existent!</h3>
+                            <p>Tous les comptes Authentication ont leur profil Firestore.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = `<h3 style="margin-top: 20px;">⚠️ ${missing.length} profil(s) manquant(s):</h3>`;
+                
+                missing.forEach(user => {
+                    html += `
+                        <div class="user-item" id="user-${user.email}">
+                            <strong>📧 ${user.email}</strong><br>
+                            <small>UID: ${user.uid}</small><br>
+                            <button class="btn" style="margin-top: 10px;" onclick="createProfile('${user.uid}', '${user.email}')">
+                                🔧 Créer le Profil Firestore
+                            </button>
+                        </div>
+                    `;
+                });
+
+                result.innerHTML = html;
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                result.innerHTML = `
+                    <div class="user-item">
+                        <h3>❌ Erreur</h3>
+                        <p>${error.message}</p>
+                        <p><strong>Solution:</strong> Copiez l'UID de mickael depuis Firebase Authentication et créez manuellement son profil.</p>
+                    </div>
+                `;
+            }
+        };
+
+        let currentUid = null;
+        let currentEmail = null;
+
+        window.togglePermissionsModal = function() {
+            const role = document.getElementById('modal-role').value;
+            const permSection = document.getElementById('modal-permissions');
+            
+            if (role === 'utilisateur') {
+                permSection.classList.add('show');
+            } else {
+                permSection.classList.remove('show');
+            }
+        };
+
+        window.createProfile = function(uid, email) {
+            currentUid = uid;
+            currentEmail = email;
+            
+            // Pré-remplir le formulaire
+            document.getElementById('modal-email').value = email;
+            document.getElementById('modal-prenom').value = email.split('@')[0];
+            document.getElementById('modal-nom').value = '';
+            document.getElementById('modal-role').value = 'utilisateur';
+            
+            // Décocher toutes les permissions
+            document.getElementById('modal-perm-view-casiers').checked = false;
+            document.getElementById('modal-perm-edit-casiers').checked = false;
+            document.getElementById('modal-perm-view-equipements').checked = false;
+            document.getElementById('modal-perm-edit-equipements').checked = false;
+            
+            // Afficher les permissions
+            togglePermissionsModal();
+            
+            // Ouvrir le modal
+            document.getElementById('create-modal').classList.add('show');
+        };
+
+        window.closeModal = function() {
+            document.getElementById('create-modal').classList.remove('show');
+        };
+
+        document.getElementById('create-profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const userDiv = document.getElementById(`user-${currentEmail}`);
+            userDiv.innerHTML = '<p>⏳ Création du profil...</p>';
+            
+            closeModal();
+
+            try {
+                const prenom = document.getElementById('modal-prenom').value.trim();
+                const nom = document.getElementById('modal-nom').value.trim();
+                const role = document.getElementById('modal-role').value;
+
+                const userData = {
+                    email: currentEmail,
+                    prenom: prenom,
+                    nom: nom,
+                    role: role,
+                    createdAt: new Date().toISOString(),
+                    createdBy: auth.currentUser.email,
+                    repairedManually: true
+                };
+
+                if (role === 'utilisateur') {
+                    userData.permissions = {
+                        viewCasiers: document.getElementById('modal-perm-view-casiers').checked,
+                        editCasiers: document.getElementById('modal-perm-edit-casiers').checked,
+                        viewEquipements: document.getElementById('modal-perm-view-equipements').checked,
+                        editEquipements: document.getElementById('modal-perm-edit-equipements').checked
+                    };
+                }
+
+                await setDoc(doc(db, 'users', currentUid), userData);
+
+                userDiv.className = 'user-item fixed';
+                userDiv.innerHTML = `
+                    <strong>✅ ${currentEmail}</strong><br>
+                    <small>Profil créé avec succès!</small><br>
+                    <pre style="font-size: 0.8em; margin-top: 10px;">${JSON.stringify(userData, null, 2)}</pre>
+                `;
+
+            } catch (error) {
+                console.error('Erreur création:', error);
+                userDiv.className = 'user-item';
+                userDiv.innerHTML = `
+                    <strong>❌ ${currentEmail}</strong><br>
+                    <p style="color: red;">${error.message}</p>
+                    <button class="btn" onclick="createProfile('${currentUid}', '${currentEmail}')">Réessayer</button>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

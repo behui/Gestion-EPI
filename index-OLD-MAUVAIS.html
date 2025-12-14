@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏭 Gestion Casiers PPVE - 288 Casiers</title>
+    
+    <!-- Firebase SDK v10 -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMPBik5vpX8qOYWuhPzpJZoOLjE20pl6g",
+            authDomain: "gestion-epi-4387a.firebaseapp.com",
+            projectId: "gestion-epi-4387a",
+            storageBucket: "gestion-epi-4387a.firebasestorage.app",
+            messagingSenderId: "974706767408",
+            appId: "1:974706767408:web:fde01e52a3a986d6da9ff5",
+            measurementId: "G-PKNXH32P0Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+        
+        window.firebaseDB = db;
+        window.firebaseApp = app;
+        window.firebaseReady = true;
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sync-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: #E8F5E9;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #4CAF50;
+        }
+
+        .sync-indicator.syncing {
+            background: #FFF3E0;
+            color: #FF9800;
+        }
+
+        .sync-indicator .pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            background: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* STATS */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* FILTERS */
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* LOCKERS GRID */
+        .lockers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .locker-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border-left: 5px solid #4CAF50;
+        }
+
+        .locker-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .locker-card.en-attente {
+            border-left-color: #FF9800;
+        }
+
+        .locker-card.occupé {
+            border-left-color: #F44336;
+        }
+
+        .locker-card.inactif {
+            border-left-color: #9E9E9E;
+            opacity: 0.7;
+        }
+
+        .locker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .locker-id {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .locker-platform {
+            font-size: 11px;
+            background: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 5px;
+            color: #666;
+        }
+
+        .locker-status {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            padding: 5px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .locker-status.libre {
+            background: #E8F5E9;
+            color: #4CAF50;
+        }
+
+        .locker-status.en-attente {
+            background: #FFF3E0;
+            color: #FF9800;
+        }
+
+        .locker-status.occupé {
+            background: #FFEBEE;
+            color: #F44336;
+        }
+
+        .locker-status.inactif {
+            background: #F5F5F5;
+            color: #9E9E9E;
+        }
+
+        .locker-info {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .locker-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #F44336;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #FF9800;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #9E9E9E;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-modal {
+            font-size: 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* VALIDATION CHECKLIST */
+        .validation-section {
+            background: #FFF3E0;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #FF9800;
+        }
+
+        .validation-section h3 {
+            color: #F57C00;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .checklist-item:hover {
+            background: #f5f5f5;
+            transform: translateX(5px);
+        }
+
+        .checklist-item.checked {
+            background: #E8F5E9;
+            border: 2px solid #4CAF50;
+        }
+
+        .checklist-checkbox {
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            border: 3px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+
+        .checklist-item.checked .checklist-checkbox {
+            background: #4CAF50;
+            border-color: #4CAF50;
+            color: white;
+        }
+
+        .checklist-label {
+            flex: 1;
+        }
+
+        .checklist-label .title {
+            font-weight: 600;
+            color: #333;
+            font-size: 15px;
+        }
+
+        .checklist-label .value {
+            color: #666;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .warning-box {
+            background: #FFEBEE;
+            border-left: 5px solid #F44336;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .warning-box strong {
+            color: #C62828;
+            display: block;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .warning-box p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        /* USER SECTION */
+        .user-check {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .user-check h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .user-locker-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .user-locker-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 5px solid;
+            transition: transform 0.3s;
+        }
+
+        .user-locker-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .user-locker-card.en-attente {
+            border-left-color: #FF9800;
+        }
+
+        .user-locker-card.occupé {
+            border-left-color: #F44336;
+        }
+
+        .user-locker-card.inactif {
+            border-left-color: #9E9E9E;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .lockers-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 10px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .sync-indicator {
+                position: static;
+                margin-top: 10px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>🏭 GESTION CASIERS & MASQUES PPVE</h1>
+            <p style="color: #666;">288 casiers : CI (78) • CA-A (70) • CA-B (70) • CA-C (70)</p>
+            <div class="sync-indicator" id="sync-indicator">
+                <div class="pulse"></div>
+                <span>Synchronisé</span>
+            </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('dashboard')">
+                📊 Vue d'Ensemble
+            </button>
+            <button class="tab" onclick="switchTab('user')">
+                👤 Espace Utilisateur
+            </button>
+        </div>
+
+        <!-- DASHBOARD SECTION -->
+        <div id="dashboard" class="section active">
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>📦 Total</h3>
+                    <div class="number" id="stat-total">288</div>
+                </div>
+                <div class="stat-card">
+                    <h3>🟢 Libres</h3>
+                    <div class="number" id="stat-libre" style="color: #4CAF50;">-</div>
+                </div>
+                <div class="stat-card">
+                    <h3>🟠 En Attente</h3>
+                    <div class="number" id="stat-attente" style="color: #FF9800;">-</div>
+                </div>
+                <div class="stat-card">
+                    <h3>🔴 Occupés</h3>
+                    <div class="number" id="stat-occupe" style="color: #F44336;">-</div>
+                </div>
+                <div class="stat-card">
+                    <h3>⚫ Inactifs</h3>
+                    <div class="number" id="stat-inactif" style="color: #9E9E9E;">-</div>
+                </div>
+            </div>
+
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterPlatform('all')">
+                    🌐 Toutes (288)
+                </button>
+                <button class="filter-btn" onclick="filterPlatform('CI')">
+                    📍 CI (78)
+                </button>
+                <button class="filter-btn" onclick="filterPlatform('CA-A')">
+                    📍 CA-A (70)
+                </button>
+                <button class="filter-btn" onclick="filterPlatform('CA-B')">
+                    📍 CA-B (70)
+                </button>
+                <button class="filter-btn" onclick="filterPlatform('CA-C')">
+                    📍 CA-C (70)
+                </button>
+            </div>
+
+            <div id="lockers-grid" class="lockers-grid"></div>
+        </div>
+
+        <!-- USER SECTION -->
+        <div id="user" class="section">
+            <div class="user-check">
+                <h2>👤 Espace Utilisateur - Gestion des Casiers</h2>
+                <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                    Gérez les casiers EN ATTENTE, OCCUPÉS et INACTIFS
+                </p>
+                
+                <div class="filters" style="justify-content: center;">
+                    <button class="filter-btn active" onclick="filterUserStatus('all')">
+                        Tous les casiers
+                    </button>
+                    <button class="filter-btn" onclick="filterUserStatus('EN ATTENTE')">
+                        🟠 En Attente
+                    </button>
+                    <button class="filter-btn" onclick="filterUserStatus('OCCUPÉ')">
+                        🔴 Occupés
+                    </button>
+                    <button class="filter-btn" onclick="filterUserStatus('INACTIF')">
+                        ⚫ Inactifs
+                    </button>
+                </div>
+
+                <div id="user-lockers-list" class="user-locker-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ATTRIBUTION -->
+    <div id="assign-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Attribuer le Casier</h2>
+                <button class="close-modal" onclick="closeModal('assign-modal')">&times;</button>
+            </div>
+            <form onsubmit="assignLocker(event)">
+                <input type="hidden" id="modal-locker-id">
+                <div class="form-group">
+                    <label>Casier</label>
+                    <input type="text" id="modal-locker-display" disabled style="background: #f0f0f0;">
+                </div>
+                <div class="form-group">
+                    <label>Prénom *</label>
+                    <input type="text" id="modal-prenom" required>
+                </div>
+                <div class="form-group">
+                    <label>Nom *</label>
+                    <input type="text" id="modal-nom" required>
+                </div>
+                <div class="form-group">
+                    <label>Référence Masque *</label>
+                    <input type="text" id="modal-masque" required>
+                </div>
+                <div class="form-group">
+                    <label>Référence Tuyau</label>
+                    <input type="text" id="modal-tuyau">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" onclick="closeModal('assign-modal')" style="flex: 1;">
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn btn-warning" style="flex: 1;">
+                        🟠 Mettre en Attente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL VALIDATION -->
+    <div id="validation-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✅ Validation du Casier</h2>
+                <button class="close-modal" onclick="closeModal('validation-modal')">&times;</button>
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 48px; margin-bottom: 10px;">🔐</div>
+                <div style="font-size: 24px; font-weight: bold; color: #333;" id="validation-locker-id"></div>
+                <div style="color: #666; margin-top: 5px;">
+                    <span id="validation-user-name"></span>
+                </div>
+                <div style="color: #999; font-size: 14px; margin-top: 5px;">
+                    📅 <span id="validation-date"></span>
+                </div>
+            </div>
+
+            <div class="validation-section">
+                <h3>⚠️ VÉRIFIEZ VOS ÉQUIPEMENTS</h3>
+                
+                <div class="checklist-item" onclick="toggleCheck(1)">
+                    <div class="checklist-checkbox" id="check-1"></div>
+                    <div class="checklist-label">
+                        <div class="title">🎭 Masque</div>
+                        <div class="value" id="validation-masque"></div>
+                    </div>
+                </div>
+
+                <div class="checklist-item" onclick="toggleCheck(2)">
+                    <div class="checklist-checkbox" id="check-2"></div>
+                    <div class="checklist-label">
+                        <div class="title">🔧 Tuyau</div>
+                        <div class="value" id="validation-tuyau"></div>
+                    </div>
+                </div>
+
+                <div class="checklist-item" onclick="toggleCheck(3)">
+                    <div class="checklist-checkbox" id="check-3"></div>
+                    <div class="checklist-label">
+                        <div class="title">🔐 Casier</div>
+                        <div class="value" id="validation-casier"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ ATTENTION - RESPONSABILITÉ</strong>
+                <p>
+                    En cochant ces cases, vous confirmez avoir reçu ces équipements et en acceptez la responsabilité.
+                </p>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('validation-modal')" style="flex: 1;">
+                    ❌ Annuler
+                </button>
+                <button type="button" class="btn btn-danger" id="validate-btn" onclick="confirmValidation()" style="flex: 1;" disabled>
+                    ✅ Je Valide et Confirme
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // ═══════════════════════════════════════════════════════════════
+        // 📦 VARIABLES GLOBALES
+        // ═══════════════════════════════════════════════════════════════
+        
+        let lockers = [];
+        let currentFilter = 'all';
+        let currentUserFilter = 'all';
+        let checklistState = [false, false, false];
+        let currentValidationLockerId = null;
+        let isLocalUpdate = false;
+        let isInitialLoad = true;
+        const db = window.firebaseDB;
+
+        // ═══════════════════════════════════════════════════════════════
+        // 🎨 UI INDICATORS
+        // ═══════════════════════════════════════════════════════════════
+        
+        function setSyncStatus(status) {
+            const indicator = document.getElementById('sync-indicator');
+            if (status === 'syncing') {
+                indicator.className = 'sync-indicator syncing';
+                indicator.querySelector('span').textContent = 'Synchronisation...';
+            } else {
+                indicator.className = 'sync-indicator';
+                indicator.querySelector('span').textContent = 'Synchronisé';
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // 📦 DATA INITIALIZATION
+        // ═══════════════════════════════════════════════════════════════
+        
+        function initLockers() {
+            lockers = [];
+            
+            for (let i = 1; i <= 78; i++) {
+                lockers.push(createLocker(`C${String(i).padStart(2, '0')}`, 'CI'));
+            }
+            
+            for (let i = 1; i <= 70; i++) {
+                lockers.push(createLocker(`CAA${String(i).padStart(2, '0')}`, 'CA-A'));
+            }
+            
+            for (let i = 1; i <= 70; i++) {
+                lockers.push(createLocker(`CAB${String(i).padStart(2, '0')}`, 'CA-B'));
+            }
+            
+            for (let i = 1; i <= 70; i++) {
+                lockers.push(createLocker(`CAC${String(i).padStart(2, '0')}`, 'CA-C'));
+            }
+            
+            console.log(`✅ ${lockers.length} casiers initialisés`);
+        }
+
+        function createLocker(id, platform) {
+            return {
+                id,
+                platform,
+                statut: 'LIBRE',
+                prenom: '',
+                nom: '',
+                refMasque: '',
+                refTuyau: '',
+                date: ''
+            };
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // 💾 FIREBASE OPERATIONS
+        // ═══════════════════════════════════════════════════════════════
+        
+        async function saveData() {
+            try {
+                isLocalUpdate = true;
+                setSyncStatus('syncing');
+                
+                localStorage.setItem('ppve_lockers', JSON.stringify(lockers));
+                
+                await setDoc(doc(db, 'casiers', 'data'), {
+                    lockers: lockers,
+                    lastUpdate: new Date().toISOString()
+                });
+                
+                console.log('✅ Sauvegarde Firebase réussie');
+                setSyncStatus('synced');
+            } catch (error) {
+                console.error('❌ Erreur sauvegarde:', error);
+                alert('⚠️ Erreur lors de la sauvegarde.');
+                isLocalUpdate = false;
+            }
+        }
+
+        async function loadData() {
+            try {
+                const docRef = doc(db, 'casiers', 'data');
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.lockers && data.lockers.length === 288) {
+                        lockers = data.lockers;
+                        
+                        const stats = {
+                            libre: lockers.filter(l => l.statut === 'LIBRE').length,
+                            attente: lockers.filter(l => l.statut === 'EN ATTENTE').length,
+                            occupe: lockers.filter(l => l.statut === 'OCCUPÉ').length,
+                            inactif: lockers.filter(l => l.statut === 'INACTIF').length
+                        };
+                        
+                        console.log('✅ Chargement Firebase:', stats);
+                        localStorage.setItem('ppve_lockers', JSON.stringify(lockers));
+                        return true;
+                    }
+                }
+                
+                console.warn('⚠️ Aucune donnée Firebase');
+            } catch (error) {
+                console.error('❌ Erreur chargement:', error);
+            }
+            
+            const stored = localStorage.getItem('ppve_lockers');
+            if (stored) {
+                const data = JSON.parse(stored);
+                if (data.length === 288) {
+                    lockers = data;
+                    console.log('⚠️ Chargement localStorage');
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        function setupRealtimeSync() {
+            const docRef = doc(db, 'casiers', 'data');
+            
+            onSnapshot(docRef, (snapshot) => {
+                if (isInitialLoad) {
+                    isInitialLoad = false;
+                    console.log('🎯 Sync temps réel activée');
+                    return;
+                }
+                
+                if (isLocalUpdate) {
+                    isLocalUpdate = false;
+                    return;
+                }
+                
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    if (data.lockers && data.lockers.length === 288) {
+                        const oldData = JSON.stringify(lockers);
+                        const newData = JSON.stringify(data.lockers);
+                        
+                        if (oldData !== newData) {
+                            console.log('🔄 Mise à jour reçue');
+                            lockers = data.lockers;
+                            localStorage.setItem('ppve_lockers', JSON.stringify(lockers));
+                            updateStats();
+                            renderLockers();
+                            renderUserLockers();
+                            setSyncStatus('synced');
+                        }
+                    }
+                }
+            }, (error) => {
+                console.error('❌ Erreur sync:', error);
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // ✅ VALIDATION CHECKLIST
+        // ═══════════════════════════════════════════════════════════════
+        
+        window.toggleCheck = function(index) {
+            const checkIndex = index - 1;
+            checklistState[checkIndex] = !checklistState[checkIndex];
+            
+            const checkbox = document.getElementById(`check-${index}`);
+            const item = checkbox.parentElement;
+            
+            if (checklistState[checkIndex]) {
+                checkbox.textContent = '✓';
+                item.classList.add('checked');
+            } else {
+                checkbox.textContent = '';
+                item.classList.remove('checked');
+            }
+            
+            const allChecked = checklistState.every(state => state);
+            document.getElementById('validate-btn').disabled = !allChecked;
+        };
+
+        function resetChecklist() {
+            checklistState = [false, false, false];
+            for (let i = 1; i <= 3; i++) {
+                const checkbox = document.getElementById(`check-${i}`);
+                const item = checkbox.parentElement;
+                checkbox.textContent = '';
+                item.classList.remove('checked');
+            }
+            document.getElementById('validate-btn').disabled = true;
+        }
+
+        window.openValidationModal = function(lockerId) {
+            const locker = lockers.find(l => l.id === lockerId);
+            if (!locker) return;
+            
+            currentValidationLockerId = lockerId;
+            resetChecklist();
+            
+            document.getElementById('validation-locker-id').textContent = locker.id;
+            document.getElementById('validation-user-name').textContent = `${locker.prenom} ${locker.nom}`;
+            document.getElementById('validation-date').textContent = locker.date;
+            document.getElementById('validation-masque').textContent = locker.refMasque;
+            document.getElementById('validation-tuyau').textContent = locker.refTuyau || 'Non fourni';
+            document.getElementById('validation-casier').textContent = locker.id;
+            
+            document.getElementById('validation-modal').classList.add('active');
+        };
+
+        window.confirmValidation = async function() {
+            if (!currentValidationLockerId) return;
+            
+            const locker = lockers.find(l => l.id === currentValidationLockerId);
+            if (!locker) return;
+            
+            locker.statut = 'OCCUPÉ';
+            
+            await saveData();
+            updateStats();
+            renderLockers();
+            renderUserLockers();
+            closeModal('validation-modal');
+            
+            alert(`✅ Casier ${locker.id} activé et OCCUPÉ par ${locker.prenom} ${locker.nom}\n\nÉquipements validés :\n🎭 ${locker.refMasque}\n🔧 ${locker.refTuyau || 'Aucun'}\n🔐 ${locker.id}`);
+        };
+
+        // ═══════════════════════════════════════════════════════════════
+        // 🎨 UI FUNCTIONS
+        // ═══════════════════════════════════════════════════════════════
+        
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            
+            if (tab === 'user') {
+                renderUserLockers();
+            }
+        };
+
+        window.filterPlatform = function(platform) {
+            currentFilter = platform;
+            document.querySelectorAll('.filters .filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderLockers();
+        };
+
+        window.filterUserStatus = function(status) {
+            currentUserFilter = status;
+            document.querySelectorAll('#user .filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderUserLockers();
+        };
+
+        function renderLockers() {
+            const grid = document.getElementById('lockers-grid');
+            grid.innerHTML = '';
+            
+            const filtered = currentFilter === 'all' 
+                ? lockers 
+                : lockers.filter(l => l.platform === currentFilter);
+            
+            filtered.forEach(locker => {
+                const card = document.createElement('div');
+                const statusClass = locker.statut.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(' ', '-');
+                card.className = `locker-card ${statusClass}`;
+                
+                card.innerHTML = `
+                    <div class="locker-header">
+                        <div class="locker-id">${locker.id}</div>
+                        <div class="locker-platform">${locker.platform}</div>
+                    </div>
+                    <div class="locker-status ${statusClass}">
+                        ${getStatusIcon(locker.statut)} ${locker.statut}
+                    </div>
+                    ${locker.statut !== 'LIBRE' ? `
+                        <div class="locker-info">👤 ${locker.prenom} ${locker.nom}</div>
+                        <div class="locker-info">🎭 ${locker.refMasque}</div>
+                        ${locker.refTuyau ? `<div class="locker-info">🔧 ${locker.refTuyau}</div>` : ''}
+                        <div class="locker-info">📅 ${locker.date}</div>
+                    ` : ''}
+                    <div class="locker-actions">
+                        ${locker.statut === 'LIBRE' ? `
+                            <button class="btn btn-success" onclick="openAssignModal('${locker.id}')">
+                                ✏️ Attribuer
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function renderUserLockers() {
+            const list = document.getElementById('user-lockers-list');
+            list.innerHTML = '';
+            
+            let filtered = lockers.filter(l => l.statut !== 'LIBRE');
+            
+            if (currentUserFilter !== 'all') {
+                filtered = filtered.filter(l => l.statut === currentUserFilter);
+            }
+            
+            if (filtered.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucun casier à gérer</p>';
+                return;
+            }
+            
+            filtered.forEach(locker => {
+                const card = document.createElement('div');
+                const statusClass = locker.statut.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(' ', '-');
+                card.className = `user-locker-card ${statusClass}`;
+                
+                let actionButton = '';
+                
+                if (locker.statut === 'EN ATTENTE') {
+                    actionButton = `
+                        <button class="btn btn-danger" onclick="openValidationModal('${locker.id}')" style="width: 100%; margin-top: 10px;">
+                            ✅ Activer (→ Occupé)
+                        </button>
+                    `;
+                } else if (locker.statut === 'OCCUPÉ') {
+                    actionButton = `
+                        <button class="btn btn-secondary" onclick="deactivateLocker('${locker.id}')" style="width: 100%; margin-top: 10px;">
+                            🔓 Libérer (→ Inactif)
+                        </button>
+                    `;
+                } else if (locker.statut === 'INACTIF') {
+                    actionButton = `
+                        <button class="btn btn-success" onclick="reactivateLocker('${locker.id}')" style="width: 100%; margin-top: 10px;">
+                            ♻️ Remettre en Service (→ Libre)
+                        </button>
+                    `;
+                }
+                
+                card.innerHTML = `
+                    <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px; color: #333;">
+                        ${locker.id}
+                    </div>
+                    <div style="font-size: 12px; background: #f0f0f0; padding: 5px; border-radius: 5px; margin-bottom: 10px; text-align: center;">
+                        ${getStatusIcon(locker.statut)} ${locker.statut}
+                    </div>
+                    <div style="font-size: 14px; margin-bottom: 5px;">👤 ${locker.prenom} ${locker.nom}</div>
+                    <div style="font-size: 14px; margin-bottom: 5px;">🎭 ${locker.refMasque}</div>
+                    ${locker.refTuyau ? `<div style="font-size: 14px; margin-bottom: 5px;">🔧 ${locker.refTuyau}</div>` : ''}
+                    <div style="font-size: 12px; color: #999;">📅 ${locker.date}</div>
+                    ${actionButton}
+                `;
+                
+                list.appendChild(card);
+            });
+        }
+
+        function getStatusIcon(status) {
+            const icons = {
+                'LIBRE': '🟢',
+                'EN ATTENTE': '🟠',
+                'OCCUPÉ': '🔴',
+                'INACTIF': '⚫'
+            };
+            return icons[status] || '⚪';
+        }
+
+        function updateStats() {
+            const stats = {
+                total: lockers.length,
+                libre: lockers.filter(l => l.statut === 'LIBRE').length,
+                attente: lockers.filter(l => l.statut === 'EN ATTENTE').length,
+                occupe: lockers.filter(l => l.statut === 'OCCUPÉ').length,
+                inactif: lockers.filter(l => l.statut === 'INACTIF').length
+            };
+            
+            document.getElementById('stat-total').textContent = stats.total;
+            document.getElementById('stat-libre').textContent = stats.libre;
+            document.getElementById('stat-attente').textContent = stats.attente;
+            document.getElementById('stat-occupe').textContent = stats.occupe;
+            document.getElementById('stat-inactif').textContent = stats.inactif;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // 📝 MODAL & ACTIONS
+        // ═══════════════════════════════════════════════════════════════
+        
+        window.openAssignModal = function(lockerId) {
+            const locker = lockers.find(l => l.id === lockerId);
+            if (!locker) return;
+            
+            document.getElementById('modal-locker-id').value = lockerId;
+            document.getElementById('modal-locker-display').value = `${lockerId} (${locker.platform})`;
+            document.getElementById('modal-prenom').value = '';
+            document.getElementById('modal-nom').value = '';
+            document.getElementById('modal-masque').value = '';
+            document.getElementById('modal-tuyau').value = '';
+            
+            document.getElementById('assign-modal').classList.add('active');
+        };
+
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        };
+
+        window.assignLocker = async function(event) {
+            event.preventDefault();
+            
+            const lockerId = document.getElementById('modal-locker-id').value;
+            const prenom = document.getElementById('modal-prenom').value.trim();
+            const nom = document.getElementById('modal-nom').value.trim();
+            const refMasque = document.getElementById('modal-masque').value.trim();
+            const refTuyau = document.getElementById('modal-tuyau').value.trim();
+            
+            const locker = lockers.find(l => l.id === lockerId);
+            if (!locker) return;
+            
+            locker.statut = 'EN ATTENTE';
+            locker.prenom = prenom;
+            locker.nom = nom;
+            locker.refMasque = refMasque;
+            locker.refTuyau = refTuyau;
+            locker.date = new Date().toLocaleDateString('fr-FR');
+            
+            await saveData();
+            updateStats();
+            renderLockers();
+            closeModal('assign-modal');
+            
+            alert(`🟠 Casier ${lockerId} mis EN ATTENTE pour ${prenom} ${nom}`);
+        };
+
+        window.deactivateLocker = async function(lockerId) {
+            if (!confirm(`Passer le casier ${lockerId} en INACTIF (nettoyage) ?`)) return;
+            
+            const locker = lockers.find(l => l.id === lockerId);
+            if (!locker) return;
+            
+            locker.statut = 'INACTIF';
+            
+            await saveData();
+            updateStats();
+            renderLockers();
+            renderUserLockers();
+            
+            alert(`⚫ Casier ${lockerId} → INACTIF (nettoyage)`);
+        };
+
+        window.reactivateLocker = async function(lockerId) {
+            if (!confirm(`Remettre le casier ${lockerId} en service (LIBRE) ?`)) return;
+            
+            const locker = lockers.find(l => l.id === lockerId);
+            if (!locker) return;
+            
+            locker.statut = 'LIBRE';
+            locker.prenom = '';
+            locker.nom = '';
+            locker.refMasque = '';
+            locker.refTuyau = '';
+            locker.date = '';
+            
+            await saveData();
+            updateStats();
+            renderLockers();
+            renderUserLockers();
+            
+            alert(`🟢 Casier ${lockerId} → LIBRE (disponible)`);
+        };
+
+        // ═══════════════════════════════════════════════════════════════
+        // 🚀 INITIALIZATION
+        // ═══════════════════════════════════════════════════════════════
+        
+        async function init() {
+            console.log('🚀 Initialisation Gestion Casiers PPVE...');
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            const loaded = await loadData();
+            if (!loaded) {
+                initLockers();
+                await saveData();
+            }
+            
+            updateStats();
+            renderLockers();
+            
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            setupRealtimeSync();
+            
+            console.log('✅ Application prête');
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

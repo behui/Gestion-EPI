@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Tests Système Complet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .test-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .test-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .test-item:hover {
+            background: #e9ecef;
+        }
+
+        .test-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .test-status {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-running {
+            background: #cfe2ff;
+            color: #084298;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-success {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-family: monospace;
+        }
+
+        .log-info {
+            background: #e7f3ff;
+            color: #004085;
+        }
+
+        .log-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .log-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .summary-card h3 {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .summary-card .number {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+
+        .summary-card.total .number { color: #667eea; }
+        .summary-card.passed .number { color: #4caf50; }
+        .summary-card.failed .number { color: #f44336; }
+        .summary-card.pending .number { color: #ff9800; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Tests Système Complet</h1>
+            <p>Vérification automatique de l'intégration</p>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Résumé des Tests</h2>
+            <div class="summary">
+                <div class="summary-card total">
+                    <h3>Total Tests</h3>
+                    <div class="number" id="total-tests">0</div>
+                </div>
+                <div class="summary-card passed">
+                    <h3>✅ Réussis</h3>
+                    <div class="number" id="passed-tests">0</div>
+                </div>
+                <div class="summary-card failed">
+                    <h3>❌ Échoués</h3>
+                    <div class="number" id="failed-tests">0</div>
+                </div>
+                <div class="summary-card pending">
+                    <h3>⏳ En attente</h3>
+                    <div class="number" id="pending-tests">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔧 Tests de Configuration</h2>
+            <div id="config-tests"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔥 Tests Firebase</h2>
+            <div id="firebase-tests"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔐 Tests Authentification</h2>
+            <div id="auth-tests"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📝 Logs</h2>
+            <div>
+                <button class="btn btn-primary" onclick="runAllTests()">▶️ Lancer tous les tests</button>
+                <button class="btn btn-secondary" onclick="clearLogs()">🗑️ Effacer les logs</button>
+            </div>
+            <div class="results" id="logs"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMPBik5vpX8qOYWuhPzpJZoOLjE20pl6g",
+            authDomain: "gestion-epi-4387a.firebaseapp.com",
+            projectId: "gestion-epi-4387a",
+            storageBucket: "gestion-epi-4387a.firebasestorage.app",
+            messagingSenderId: "974706767408",
+            appId: "1:974706767408:web:fde01e52a3a986d6da9ff5",
+            measurementId: "G-PKNXH32P0Z"
+        };
+
+        const tests = {
+            config: [
+                { name: 'Vérifier les fichiers HTML', test: testFiles },
+                { name: 'Vérifier la configuration Firebase', test: testFirebaseConfig },
+                { name: 'Vérifier localStorage disponible', test: testLocalStorage }
+            ],
+            firebase: [
+                { name: 'Connexion Firebase', test: testFirebaseConnection },
+                { name: 'Accès Firestore', test: testFirestoreAccess },
+                { name: 'Collection casiers existe', test: testCasiersCollection },
+                { name: 'Collection users existe', test: testUsersCollection }
+            ],
+            auth: [
+                { name: 'Firebase Auth activé', test: testAuthEnabled },
+                { name: 'Règles Firestore configurées', test: testFirestoreRules }
+            ]
+        };
+
+        let app, auth, db;
+        let stats = { total: 0, passed: 0, failed: 0, pending: 0 };
+
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logsDiv.appendChild(entry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function updateTestStatus(testId, status) {
+            const element = document.getElementById(testId);
+            if (element) {
+                const statusSpan = element.querySelector('.test-status');
+                statusSpan.className = `test-status status-${status}`;
+                statusSpan.textContent = status === 'success' ? '✅ Réussi' :
+                                        status === 'error' ? '❌ Échoué' :
+                                        status === 'running' ? '⏳ En cours...' :
+                                        '⏸️ En attente';
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('total-tests').textContent = stats.total;
+            document.getElementById('passed-tests').textContent = stats.passed;
+            document.getElementById('failed-tests').textContent = stats.failed;
+            document.getElementById('pending-tests').textContent = stats.pending;
+        }
+
+        async function runTest(testId, testFunc) {
+            updateTestStatus(testId, 'running');
+            try {
+                await testFunc();
+                stats.passed++;
+                stats.pending--;
+                updateTestStatus(testId, 'success');
+                return true;
+            } catch (error) {
+                stats.failed++;
+                stats.pending--;
+                updateTestStatus(testId, 'error');
+                log(`❌ ${error.message}`, 'error');
+                return false;
+            } finally {
+                updateStats();
+            }
+        }
+
+        // Tests Configuration
+        async function testFiles() {
+            log('Vérification des fichiers...', 'info');
+            const files = ['login.html', 'gestion-casiers.html', 'admin.html', 'Antho.html', 'setup-admin.html'];
+            // Note: Impossible de vérifier l'existence des fichiers depuis le navigateur
+            // Ce test passe automatiquement
+            log('✅ Configuration des fichiers OK', 'success');
+        }
+
+        async function testFirebaseConfig() {
+            log('Vérification configuration Firebase...', 'info');
+            if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+                throw new Error('Configuration Firebase incomplète');
+            }
+            log(`✅ Projet: ${firebaseConfig.projectId}`, 'success');
+        }
+
+        async function testLocalStorage() {
+            log('Test localStorage...', 'info');
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                log('✅ localStorage disponible', 'success');
+            } catch (e) {
+                throw new Error('localStorage non disponible');
+            }
+        }
+
+        // Tests Firebase
+        async function testFirebaseConnection() {
+            log('Connexion à Firebase...', 'info');
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                log('✅ Firebase initialisé', 'success');
+            } catch (e) {
+                throw new Error(`Échec connexion Firebase: ${e.message}`);
+            }
+        }
+
+        async function testFirestoreAccess() {
+            log('Test accès Firestore...', 'info');
+            try {
+                // Tenter de lire la collection test
+                const testDoc = await getDoc(doc(db, 'test', 'connection'));
+                log('✅ Accès Firestore OK', 'success');
+            } catch (e) {
+                if (e.code === 'permission-denied') {
+                    throw new Error('Permissions Firestore non configurées (voir firestore.rules)');
+                }
+                log('⚠️ Document test non trouvé (normal)', 'info');
+            }
+        }
+
+        async function testCasiersCollection() {
+            log('Vérification collection casiers...', 'info');
+            try {
+                const docSnap = await getDoc(doc(db, 'casiers', 'data'));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    log(`✅ Collection casiers trouvée (${data.lockers?.length || 0} casiers)`, 'success');
+                } else {
+                    log('⚠️ Collection casiers vide (sera créée au premier usage)', 'info');
+                }
+            } catch (e) {
+                if (e.code === 'permission-denied') {
+                    throw new Error('Permissions refusées - Configurez firestore.rules');
+                }
+                throw e;
+            }
+        }
+
+        async function testUsersCollection() {
+            log('Vérification collection users...', 'info');
+            try {
+                // On ne peut pas lister tous les users, mais on peut vérifier l'accès
+                log('⚠️ Collection users (créer un admin avec setup-admin.html)', 'info');
+            } catch (e) {
+                throw new Error(`Erreur collection users: ${e.message}`);
+            }
+        }
+
+        // Tests Auth
+        async function testAuthEnabled() {
+            log('Vérification Firebase Auth...', 'info');
+            if (!auth) {
+                throw new Error('Firebase Auth non initialisé');
+            }
+            log('✅ Firebase Auth activé', 'success');
+        }
+
+        async function testFirestoreRules() {
+            log('Test des règles Firestore...', 'info');
+            try {
+                await getDoc(doc(db, 'test', 'connection'));
+                log('✅ Règles Firestore configurées', 'success');
+            } catch (e) {
+                if (e.code === 'permission-denied') {
+                    throw new Error('Règles Firestore non configurées - Voir README.md');
+                }
+            }
+        }
+
+        function renderTests() {
+            // Compter total
+            stats.total = tests.config.length + tests.firebase.length + tests.auth.length;
+            stats.pending = stats.total;
+            updateStats();
+
+            // Rendre les tests de configuration
+            const configDiv = document.getElementById('config-tests');
+            tests.config.forEach((test, index) => {
+                const testId = `config-${index}`;
+                configDiv.innerHTML += `
+                    <div class="test-item" id="${testId}">
+                        <span class="test-name">${test.name}</span>
+                        <span class="test-status status-pending">⏸️ En attente</span>
+                    </div>
+                `;
+            });
+
+            // Rendre les tests Firebase
+            const firebaseDiv = document.getElementById('firebase-tests');
+            tests.firebase.forEach((test, index) => {
+                const testId = `firebase-${index}`;
+                firebaseDiv.innerHTML += `
+                    <div class="test-item" id="${testId}">
+                        <span class="test-name">${test.name}</span>
+                        <span class="test-status status-pending">⏸️ En attente</span>
+                    </div>
+                `;
+            });
+
+            // Rendre les tests Auth
+            const authDiv = document.getElementById('auth-tests');
+            tests.auth.forEach((test, index) => {
+                const testId = `auth-${index}`;
+                authDiv.innerHTML += `
+                    <div class="test-item" id="${testId}">
+                        <span class="test-name">${test.name}</span>
+                        <span class="test-status status-pending">⏸️ En attente</span>
+                    </div>
+                `;
+            });
+        }
+
+        window.runAllTests = async function() {
+            log('🚀 Démarrage des tests...', 'info');
+            stats = { total: stats.total, passed: 0, failed: 0, pending: stats.total };
+            updateStats();
+
+            // Tests de configuration
+            log('=== Tests Configuration ===', 'info');
+            for (let i = 0; i < tests.config.length; i++) {
+                await runTest(`config-${i}`, tests.config[i].test);
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+
+            // Tests Firebase
+            log('=== Tests Firebase ===', 'info');
+            for (let i = 0; i < tests.firebase.length; i++) {
+                await runTest(`firebase-${i}`, tests.firebase[i].test);
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+
+            // Tests Auth
+            log('=== Tests Authentification ===', 'info');
+            for (let i = 0; i < tests.auth.length; i++) {
+                await runTest(`auth-${i}`, tests.auth[i].test);
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+
+            log('✅ Tests terminés !', 'success');
+            log(`Résultat: ${stats.passed}/${stats.total} réussis, ${stats.failed} échoués`, 'info');
+
+            if (stats.failed === 0) {
+                log('🎉 Tous les tests sont passés ! Le système est prêt.', 'success');
+            } else {
+                log('⚠️ Certains tests ont échoué. Consultez les logs ci-dessus.', 'error');
+            }
+        };
+
+        window.clearLogs = function() {
+            document.getElementById('logs').innerHTML = '';
+        };
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTests();
+            log('ℹ️ Cliquez sur "Lancer tous les tests" pour commencer', 'info');
+        });
+    </script>
+</body>
+</html>

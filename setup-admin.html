@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Setup Premier Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-create {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-create:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .alert-error {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+
+        .alert-success {
+            background: #efe;
+            color: #3c3;
+            border: 1px solid #cfc;
+        }
+
+        .alert-info {
+            background: #e3f2fd;
+            color: #1976d2;
+            border: 1px solid #bbdefb;
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .info-box p {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .success-box {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            border: 2px solid #4caf50;
+        }
+
+        .success-box.show {
+            display: block;
+            animation: slideIn 0.5s;
+        }
+
+        .success-box h2 {
+            color: #4caf50;
+            margin-bottom: 15px;
+        }
+
+        .credentials {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .credentials strong {
+            color: #667eea;
+        }
+
+        .btn-login {
+            background: #4caf50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 1em;
+        }
+
+        .btn-login:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Setup</h1>
+        <p class="subtitle">Créer le premier administrateur</p>
+
+        <div id="alert" class="alert"></div>
+
+        <div id="form-container">
+            <div class="info-box">
+                <h3>ℹ️ Information</h3>
+                <p>Ce formulaire crée le premier compte administrateur pour votre application. Vous ne devrez le faire qu'une seule fois.</p>
+            </div>
+
+            <form id="setup-form">
+                <div class="form-group">
+                    <label for="prenom">Prénom *</label>
+                    <input type="text" id="prenom" placeholder="Anthony" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="nom">Nom *</label>
+                    <input type="text" id="nom" placeholder="Fernandez" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" placeholder="admin@exemple.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mot de passe * (min. 6 caractères)</label>
+                    <input type="password" id="password" placeholder="••••••••" minlength="6" required>
+                </div>
+
+                <button type="submit" class="btn-create" id="create-btn">
+                    ✅ Créer le compte administrateur
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px; color: #667eea;">Création en cours...</p>
+            </div>
+        </div>
+
+        <div id="success-box" class="success-box">
+            <h2>✅ Compte créé avec succès !</h2>
+            <p style="color: #666; margin-bottom: 15px;">Votre compte administrateur a été créé.</p>
+            <div class="credentials" id="credentials-display"></div>
+            <button class="btn-login" onclick="window.location.href='login.html'">
+                🔐 Aller à la page de connexion
+            </button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMPBik5vpX8qOYWuhPzpJZoOLjE20pl6g",
+            authDomain: "gestion-epi-4387a.firebaseapp.com",
+            projectId: "gestion-epi-4387a",
+            storageBucket: "gestion-epi-4387a.firebasestorage.app",
+            messagingSenderId: "974706767408",
+            appId: "1:974706767408:web:fde01e52a3a986d6da9ff5",
+            measurementId: "G-PKNXH32P0Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const setupForm = document.getElementById('setup-form');
+        const createBtn = document.getElementById('create-btn');
+        const loading = document.getElementById('loading');
+        const alertBox = document.getElementById('alert');
+        const formContainer = document.getElementById('form-container');
+        const successBox = document.getElementById('success-box');
+
+        function showAlert(message, type = 'error') {
+            alertBox.textContent = message;
+            alertBox.className = `alert alert-${type} show`;
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+            }, 5000);
+        }
+
+        setupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const prenom = document.getElementById('prenom').value.trim();
+            const nom = document.getElementById('nom').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!prenom || !nom || !email || !password) {
+                showAlert('⚠️ Veuillez remplir tous les champs.', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAlert('⚠️ Le mot de passe doit contenir au moins 6 caractères.', 'error');
+                return;
+            }
+
+            // Afficher le chargement
+            createBtn.disabled = true;
+            createBtn.textContent = '⏳ Création en cours...';
+            loading.classList.add('show');
+            alertBox.classList.remove('show');
+
+            try {
+                // 1. Créer l'utilisateur dans Firebase Authentication
+                console.log('Création du compte Firebase Auth...');
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                console.log('Compte créé avec UID:', user.uid);
+
+                // 2. Créer le profil dans Firestore
+                console.log('Création du profil Firestore...');
+                await setDoc(doc(db, 'users', user.uid), {
+                    prenom: prenom,
+                    nom: nom,
+                    email: email,
+                    role: 'admin',
+                    createdAt: new Date().toISOString(),
+                    createdBy: 'setup'
+                });
+
+                console.log('Profil créé avec succès !');
+
+                // Afficher le succès
+                formContainer.style.display = 'none';
+                successBox.classList.add('show');
+                
+                document.getElementById('credentials-display').innerHTML = `
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Mot de passe:</strong> ${password}</p>
+                    <p><strong>Rôle:</strong> 🔑 Administrateur</p>
+                    <p style="margin-top: 10px; color: #f57c00; font-weight: bold;">⚠️ Notez bien ces informations !</p>
+                `;
+
+                showAlert('✅ Compte administrateur créé avec succès !', 'success');
+
+            } catch (error) {
+                console.error('Erreur création compte:', error);
+                
+                let errorMessage = '❌ Erreur lors de la création du compte.';
+                
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = '❌ Cet email est déjà utilisé. Utilisez login.html pour vous connecter.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = '❌ Format d\'email invalide.';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = '❌ Mot de passe trop faible (min. 6 caractères).';
+                        break;
+                    case 'auth/operation-not-allowed':
+                        errorMessage = '❌ L\'authentification email/password n\'est pas activée dans Firebase Console.';
+                        break;
+                    default:
+                        errorMessage = `❌ ${error.message}`;
+                }
+                
+                showAlert(errorMessage, 'error');
+                
+            } finally {
+                createBtn.disabled = false;
+                createBtn.textContent = '✅ Créer le compte administrateur';
+                loading.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

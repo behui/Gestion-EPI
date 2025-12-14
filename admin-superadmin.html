@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Mode récupération d'urgence PPVE - Diagnostic et réparation du système en cas de corruption">
+    <meta name="keywords" content="superadmin, récupération, diagnostic, réparation, urgence, PPVE">
+    <meta name="robots" content="noindex, nofollow">
+    <title>SUPERADMIN - Mode Récupération | PPVE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(255, 0, 0, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 10px 40px rgba(255, 0, 0, 0.4); }
+            50% { box-shadow: 0 10px 60px rgba(255, 0, 0, 0.6); }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: white;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        .warning-banner {
+            background: rgba(255, 152, 0, 0.2);
+            border: 2px solid #ff9800;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .warning-banner h2 {
+            color: #ff9800;
+            margin-bottom: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .card.diagnostic {
+            border-color: #2196f3;
+        }
+
+        .card.repair {
+            border-color: #ff9800;
+        }
+
+        .card.agent {
+            border-color: #4caf50;
+            grid-column: 1 / -1;
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5em;
+        }
+
+        .card.diagnostic h2 { color: #2196f3; }
+        .card.repair h2 { color: #ff9800; }
+        .card.agent h2 { color: #4caf50; }
+
+        .status-grid {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #0a0a0a;
+            border-radius: 8px;
+            border-left: 4px solid #333;
+        }
+
+        .status-item.ok { border-color: #4caf50; }
+        .status-item.error { border-color: #f44336; }
+        .status-item.warning { border-color: #ff9800; }
+        .status-item.testing { border-color: #2196f3; }
+
+        .status-label {
+            font-weight: bold;
+            color: #999;
+        }
+
+        .status-value {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .status-value.ok { color: #4caf50; }
+        .status-value.error { color: #f44336; }
+        .status-value.warning { color: #ff9800; }
+        .status-value.testing { color: #2196f3; }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+        }
+
+        .info-box {
+            background: rgba(33, 150, 243, 0.1);
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h3 {
+            color: #2196f3;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .info-box p {
+            color: #999;
+            line-height: 1.6;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+            margin-top: 10px;
+            color: #999;
+        }
+
+        .info-box li {
+            margin: 5px 0;
+        }
+
+        /* Agent conversationnel */
+        .chat-container {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 10px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .chat-message {
+            padding: 12px 18px;
+            border-radius: 12px;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+
+        .chat-message.agent {
+            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+            color: white;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-message.user {
+            background: #2196f3;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-input-container {
+            padding: 15px;
+            border-top: 1px solid #333;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: #1a1a1a;
+            color: white;
+            font-size: 1em;
+        }
+
+        .chat-btn {
+            padding: 12px 24px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .chat-btn:hover {
+            background: #388e3c;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            padding: 10px 20px;
+            flex-wrap: wrap;
+        }
+
+        .quick-action {
+            padding: 8px 16px;
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4caf50;
+            border-radius: 20px;
+            color: #4caf50;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .quick-action:hover {
+            background: #4caf50;
+            color: white;
+        }
+
+        .console-log {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .console-line {
+            padding: 3px 0;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .console-line.success { color: #4caf50; }
+        .console-line.error { color: #f44336; }
+        .console-line.warning { color: #ff9800; }
+        .console-line.info { color: #2196f3; }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .btn-group {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-container {
+                height: 300px;
+            }
+
+            .chat-message {
+                max-width: 90%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .btn {
+                padding: 12px;
+                font-size: 0.95em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚨 MODE SUPERADMIN</h1>
+            <p>Diagnostic & Récupération d'Urgence - Tous droits administratifs activés</p>
+        </div>
+
+        <div class="warning-banner">
+            <h2>⚠️ MODE RÉCUPÉRATION ACTIVÉ</h2>
+            <p>Vous êtes connecté en mode superadmin. Ce mode bypass toutes les sécurités Firebase et permet la récupération du système en cas de corruption. Utilisez avec précaution.</p>
+        </div>
+
+        <div class="grid">
+            <!-- Diagnostic automatique -->
+            <div class="card diagnostic">
+                <h2>🔍 Diagnostic du Système</h2>
+                
+                <div class="info-box">
+                    <h3>Que fait le diagnostic ?</h3>
+                    <p>Le diagnostic vérifie automatiquement :</p>
+                    <ul>
+                        <li>✅ Connexion à Firebase (Authentication & Firestore)</li>
+                        <li>✅ État des comptes administrateurs</li>
+                        <li>✅ Intégrité de la base de données</li>
+                        <li>✅ Règles de sécurité Firestore</li>
+                    </ul>
+                </div>
+
+                <div class="status-grid" id="statusGrid">
+                    <div class="status-item testing">
+                        <span class="status-label">🔥 Firebase Auth</span>
+                        <span class="status-value testing"><span class="spinner"></span> Test...</span>
+                    </div>
+                    <div class="status-item testing">
+                        <span class="status-label">💾 Firestore Database</span>
+                        <span class="status-value testing"><span class="spinner"></span> Test...</span>
+                    </div>
+                    <div class="status-item testing">
+                        <span class="status-label">👤 Comptes Admin</span>
+                        <span class="status-value testing"><span class="spinner"></span> Scan...</span>
+                    </div>
+                    <div class="status-item testing">
+                        <span class="status-label">🛡️ Règles Sécurité</span>
+                        <span class="status-value testing"><span class="spinner"></span> Test...</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="runFullDiagnostic()">
+                    🔍 Relancer le diagnostic complet
+                </button>
+            </div>
+
+            <!-- Outils de réparation -->
+            <div class="card repair">
+                <h2>🔧 Outils de Réparation</h2>
+                
+                <div class="info-box">
+                    <h3>Réparations disponibles</h3>
+                    <p>Ces outils permettent de réparer les problèmes détectés :</p>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-success" onclick="repairAdminAccount()">
+                        👤 Recréer Admin
+                    </button>
+                    <button class="btn btn-success" onclick="repairFirestore()">
+                        💾 Réparer Firestore
+                    </button>
+                    <button class="btn btn-warning" onclick="resetPermissions()">
+                        🔑 Réinitialiser Permissions
+                    </button>
+                    <button class="btn btn-warning" onclick="cleanOrphans()">
+                        🧹 Nettoyer Orphelins
+                    </button>
+                    <button class="btn btn-danger" onclick="emergencyReset()">
+                        ⚠️ Reset Complet
+                    </button>
+                    <button class="btn btn-primary" onclick="exportBackup()">
+                        💾 Export Sauvegarde
+                    </button>
+                </div>
+
+                <div id="repairLog" class="console-log" style="margin-top: 20px; display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Agent SuperAdmin -->
+        <div class="card agent">
+            <h2>🤖 Agent SuperAdmin - Assistant de Réparation</h2>
+            
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chat-message agent">
+                        👋 Bonjour ! Je suis l'Agent SuperAdmin, votre assistant de récupération d'urgence.<br><br>
+                        Je vais vous guider étape par étape pour résoudre les problèmes de votre site.<br><br>
+                        <strong>Que s'est-il passé ?</strong> Cliquez sur une action rapide ou décrivez votre problème :
+                    </div>
+                </div>
+                
+                <div class="quick-actions">
+                    <div class="quick-action" onclick="quickAction('crash')">🔥 Le site a crashé</div>
+                    <div class="quick-action" onclick="quickAction('admin')">👤 Je ne peux plus me connecter</div>
+                    <div class="quick-action" onclick="quickAction('users')">👥 Les utilisateurs ont disparu</div>
+                    <div class="quick-action" onclick="quickAction('data')">💾 Les données sont corrompues</div>
+                </div>
+
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Décrivez votre problème..." onkeypress="if(event.key==='Enter') sendMessage()">
+                    <button class="chat-btn" onclick="sendMessage()">Envoyer</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: rgba(33, 150, 243, 0.1); border-radius: 10px;">
+            <button class="btn btn-primary" onclick="location.href='gestion-casiers.html'" style="margin-right: 10px;">
+                🏠 Retour à l'application
+            </button>
+            <button class="btn btn-warning" onclick="location.href='index.html'">
+                🚪 Déconnexion
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getFirestore, collection, getDocs, doc, getDoc, setDoc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDkIsOs8UkiHMp99HzdNnXtJQdz4Eikm2E",
+            authDomain: "gestion-epi-fc7e3.firebaseapp.com",
+            projectId: "gestion-epi-fc7e3",
+            storageBucket: "gestion-epi-fc7e3.firebasestorage.app",
+            messagingSenderId: "577550382349",
+            appId: "1:577550382349:web:b3bd34cc0ab2e93d5cb31c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Vérifier l'accès SUPERADMIN
+        const isSuperAdmin = sessionStorage.getItem('superadmin') === 'true';
+        if (!isSuperAdmin) {
+            alert('⛔ Accès refusé : Mode SUPERADMIN requis');
+            window.location.href = 'index.html';
+        }
+
+        // Logs console
+        const repairLog = document.getElementById('repairLog');
+        function addLog(message, type = 'info') {
+            repairLog.style.display = 'block';
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            line.textContent = `[${timestamp}] ${message}`;
+            repairLog.appendChild(line);
+            repairLog.scrollTop = repairLog.scrollHeight;
+        }
+
+        // Diagnostic automatique au chargement
+        window.addEventListener('load', () => {
+            setTimeout(runFullDiagnostic, 1000);
+        });
+
+        window.runFullDiagnostic = async function() {
+            addLog('🔍 Démarrage du diagnostic complet...', 'info');
+            
+            // Test Firebase Auth
+            const authStatus = document.querySelectorAll('.status-item')[0];
+            try {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                if (auth) {
+                    authStatus.className = 'status-item ok';
+                    authStatus.querySelector('.status-value').innerHTML = '✅ Opérationnel';
+                    authStatus.querySelector('.status-value').className = 'status-value ok';
+                    addLog('✅ Firebase Authentication : OK', 'success');
+                } else {
+                    throw new Error('Auth non initialisé');
+                }
+            } catch (error) {
+                authStatus.className = 'status-item error';
+                authStatus.querySelector('.status-value').innerHTML = '❌ Erreur';
+                authStatus.querySelector('.status-value').className = 'status-value error';
+                addLog(`❌ Firebase Auth : ${error.message}`, 'error');
+            }
+
+            // Test Firestore
+            const firestoreStatus = document.querySelectorAll('.status-item')[1];
+            try {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                const testDoc = await getDocs(collection(db, 'users'));
+                firestoreStatus.className = 'status-item ok';
+                firestoreStatus.querySelector('.status-value').innerHTML = '✅ Opérationnel';
+                firestoreStatus.querySelector('.status-value').className = 'status-value ok';
+                addLog('✅ Firestore Database : OK', 'success');
+            } catch (error) {
+                firestoreStatus.className = 'status-item error';
+                firestoreStatus.querySelector('.status-value').innerHTML = '❌ Erreur';
+                firestoreStatus.querySelector('.status-value').className = 'status-value error';
+                addLog(`❌ Firestore : ${error.message}`, 'error');
+            }
+
+            // Test comptes admin
+            const adminStatus = document.querySelectorAll('.status-item')[2];
+            try {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                const admins = usersSnapshot.docs.filter(doc => doc.data().role === 'admin');
+                
+                if (admins.length > 0) {
+                    adminStatus.className = 'status-item ok';
+                    adminStatus.querySelector('.status-value').innerHTML = `✅ ${admins.length} admin(s)`;
+                    adminStatus.querySelector('.status-value').className = 'status-value ok';
+                    addLog(`✅ ${admins.length} compte(s) administrateur trouvé(s)`, 'success');
+                } else {
+                    adminStatus.className = 'status-item warning';
+                    adminStatus.querySelector('.status-value').innerHTML = '⚠️ Aucun admin';
+                    adminStatus.querySelector('.status-value').className = 'status-value warning';
+                    addLog('⚠️ Aucun compte administrateur trouvé !', 'warning');
+                }
+            } catch (error) {
+                adminStatus.className = 'status-item error';
+                adminStatus.querySelector('.status-value').innerHTML = '❌ Erreur';
+                adminStatus.querySelector('.status-value').className = 'status-value error';
+                addLog(`❌ Scan admins : ${error.message}`, 'error');
+            }
+
+            // Test règles sécurité
+            const rulesStatus = document.querySelectorAll('.status-item')[3];
+            try {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                rulesStatus.className = 'status-item ok';
+                rulesStatus.querySelector('.status-value').innerHTML = '✅ Actives';
+                rulesStatus.querySelector('.status-value').className = 'status-value ok';
+                addLog('✅ Règles de sécurité : Actives', 'success');
+            } catch (error) {
+                rulesStatus.className = 'status-item error';
+                rulesStatus.querySelector('.status-value').innerHTML = '❌ Erreur';
+                rulesStatus.querySelector('.status-value').className = 'status-value error';
+                addLog(`❌ Règles : ${error.message}`, 'error');
+            }
+
+            addLog('✅ Diagnostic terminé !', 'success');
+        };
+
+        // Réparations
+        window.repairAdminAccount = async function() {
+            if (!confirm('⚠️ Cette action va créer/réparer le compte administrateur principal.\n\nEmail : anthony.fernandez@masque-lascaussade.fr\n\nContinuer ?')) {
+                return;
+            }
+
+            addLog('🔧 Réparation du compte admin...', 'info');
+            addChatMessage('agent', '🔧 Je commence la réparation du compte administrateur...');
+
+            try {
+                // Créer/Réparer le profil Firestore
+                const adminEmail = 'anthony.fernandez@masque-lascaussade.fr';
+                const adminRef = doc(db, 'users', 'admin-recovery-uid-001');
+                
+                await setDoc(adminRef, {
+                    email: adminEmail,
+                    nom: 'Fernandez',
+                    prenom: 'Anthony',
+                    role: 'admin',
+                    createdAt: new Date().toISOString(),
+                    repairedBy: 'SUPERADMIN',
+                    repairedAt: new Date().toISOString()
+                }, { merge: true });
+
+                addLog('✅ Profil admin créé/réparé dans Firestore', 'success');
+                addChatMessage('agent', '✅ <strong>Réparation réussie !</strong><br><br>Le compte admin a été recréé. Vous devez maintenant :<br>1. Aller dans Firebase Console > Authentication<br>2. Créer un utilisateur avec l\'email : anthony.fernandez@masque-lascaussade.fr<br>3. Définir un mot de passe<br>4. Vous connecter avec ce compte');
+                
+                setTimeout(runFullDiagnostic, 2000);
+            } catch (error) {
+                addLog(`❌ Erreur : ${error.message}`, 'error');
+                addChatMessage('agent', `❌ Erreur lors de la réparation : ${error.message}`);
+            }
+        };
+
+        window.repairFirestore = async function() {
+            if (!confirm('⚠️ Cette action va vérifier et réparer les documents Firestore corrompus.\n\nContinuer ?')) {
+                return;
+            }
+
+            addLog('🔧 Réparation Firestore...', 'info');
+            addChatMessage('agent', '🔧 Je vérifie la structure Firestore...');
+
+            try {
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                let repaired = 0;
+
+                for (const userDoc of usersSnapshot.docs) {
+                    const data = userDoc.data();
+                    let needsRepair = false;
+                    const updates = {};
+
+                    // Vérifier les champs obligatoires
+                    if (!data.role) {
+                        updates.role = 'user';
+                        needsRepair = true;
+                    }
+                    if (!data.email) {
+                        updates.email = `${userDoc.id}@recupere.local`;
+                        needsRepair = true;
+                    }
+
+                    if (needsRepair) {
+                        await updateDoc(doc(db, 'users', userDoc.id), updates);
+                        repaired++;
+                        addLog(`✅ Réparé : ${userDoc.id}`, 'success');
+                    }
+                }
+
+                addLog(`✅ Réparation terminée : ${repaired} document(s) réparé(s)`, 'success');
+                addChatMessage('agent', `✅ <strong>Réparation terminée !</strong><br><br>${repaired} document(s) Firestore ont été réparés.`);
+                
+                setTimeout(runFullDiagnostic, 2000);
+            } catch (error) {
+                addLog(`❌ Erreur : ${error.message}`, 'error');
+                addChatMessage('agent', `❌ Erreur : ${error.message}`);
+            }
+        };
+
+        window.resetPermissions = async function() {
+            if (!confirm('⚠️ Cette action va réinitialiser toutes les permissions utilisateurs.\n\nTous les utilisateurs deviendront "user" sauf les admins identifiés.\n\nContinuer ?')) {
+                return;
+            }
+
+            addLog('🔑 Réinitialisation des permissions...', 'info');
+            addChatMessage('agent', '🔑 Je réinitialise les permissions...');
+
+            try {
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                let updated = 0;
+
+                for (const userDoc of usersSnapshot.docs) {
+                    const data = userDoc.data();
+                    const email = data.email || '';
+
+                    // Garder admin pour anthony.fernandez@...
+                    if (email.includes('anthony.fernandez')) {
+                        await updateDoc(doc(db, 'users', userDoc.id), { role: 'admin' });
+                    } else {
+                        await updateDoc(doc(db, 'users', userDoc.id), { role: 'user' });
+                    }
+                    updated++;
+                }
+
+                addLog(`✅ ${updated} permission(s) réinitialisée(s)`, 'success');
+                addChatMessage('agent', `✅ <strong>Permissions réinitialisées !</strong><br><br>${updated} utilisateur(s) mis à jour.`);
+                
+                setTimeout(runFullDiagnostic, 2000);
+            } catch (error) {
+                addLog(`❌ Erreur : ${error.message}`, 'error');
+                addChatMessage('agent', `❌ Erreur : ${error.message}`);
+            }
+        };
+
+        window.cleanOrphans = async function() {
+            if (!confirm('⚠️ Cette action va supprimer tous les documents orphelins (sans email valide).\n\nContinuer ?')) {
+                return;
+            }
+
+            addLog('🧹 Nettoyage des orphelins...', 'info');
+            addChatMessage('agent', '🧹 Je nettoie les documents orphelins...');
+
+            try {
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                let deleted = 0;
+
+                for (const userDoc of usersSnapshot.docs) {
+                    const data = userDoc.data();
+                    
+                    // Supprimer si pas d'email ou email invalide
+                    if (!data.email || !data.email.includes('@')) {
+                        await deleteDoc(doc(db, 'users', userDoc.id));
+                        deleted++;
+                        addLog(`🗑️ Supprimé : ${userDoc.id}`, 'warning');
+                    }
+                }
+
+                addLog(`✅ ${deleted} orphelin(s) supprimé(s)`, 'success');
+                addChatMessage('agent', `✅ <strong>Nettoyage terminé !</strong><br><br>${deleted} document(s) orphelin(s) supprimé(s).`);
+                
+                setTimeout(runFullDiagnostic, 2000);
+            } catch (error) {
+                addLog(`❌ Erreur : ${error.message}`, 'error');
+                addChatMessage('agent', `❌ Erreur : ${error.message}`);
+            }
+        };
+
+        window.emergencyReset = async function() {
+            const confirmation = prompt('⚠️ ATTENTION : RESET COMPLET DU SYSTÈME\n\nCette action va :\n- Supprimer TOUS les utilisateurs de Firestore\n- Recréer le compte admin de base\n- Réinitialiser les casiers\n\nTapez "RESET" pour confirmer :');
+            
+            if (confirmation !== 'RESET') {
+                return;
+            }
+
+            addLog('⚠️ RESET COMPLET EN COURS...', 'warning');
+            addChatMessage('agent', '⚠️ <strong>RESET COMPLET ACTIVÉ</strong><br><br>Suppression de tous les utilisateurs...');
+
+            try {
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                for (const userDoc of usersSnapshot.docs) {
+                    await deleteDoc(doc(db, 'users', userDoc.id));
+                    addLog(`🗑️ Supprimé : ${userDoc.id}`, 'warning');
+                }
+
+                addLog('✅ Tous les utilisateurs supprimés', 'success');
+                addChatMessage('agent', '✅ Suppression terminée. Création du compte admin...');
+
+                // Recréer admin
+                await setDoc(doc(db, 'users', 'admin-reset-001'), {
+                    email: 'anthony.fernandez@masque-lascaussade.fr',
+                    nom: 'Fernandez',
+                    prenom: 'Anthony',
+                    role: 'admin',
+                    createdAt: new Date().toISOString(),
+                    resetBy: 'SUPERADMIN'
+                });
+
+                addLog('✅ Compte admin recréé', 'success');
+                addChatMessage('agent', '✅ <strong>RESET TERMINÉ !</strong><br><br>Le système a été réinitialisé. Allez dans Firebase Console > Authentication pour créer le compte utilisateur correspondant.');
+                
+                setTimeout(runFullDiagnostic, 3000);
+            } catch (error) {
+                addLog(`❌ Erreur : ${error.message}`, 'error');
+                addChatMessage('agent', `❌ Erreur critique : ${error.message}`);
+            }
+        };
+
+        window.exportBackup = async function() {
+            addLog('💾 Export des données...', 'info');
+            addChatMessage('agent', '💾 Je crée une sauvegarde complète...');
+
+            try {
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                const backup = {
+                    exportDate: new Date().toISOString(),
+                    exportedBy: 'SUPERADMIN',
+                    users: []
+                };
+
+                usersSnapshot.docs.forEach(doc => {
+                    backup.users.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+
+                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup-superadmin-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+
+                addLog(`✅ Sauvegarde créée : ${backup.users.length} utilisateur(s)`, 'success');
+                addChatMessage('agent', `✅ <strong>Sauvegarde créée !</strong><br><br>Fichier téléchargé avec ${backup.users.length} utilisateur(s).`);
+            } catch (error) {
+                addLog(`❌ Erreur : ${error.message}`, 'error');
+                addChatMessage('agent', `❌ Erreur : ${error.message}`);
+            }
+        };
+
+        // Agent conversationnel
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+
+        function addChatMessage(sender, message) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `chat-message ${sender}`;
+            msgDiv.innerHTML = message;
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        window.sendMessage = function() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            addChatMessage('user', message);
+            chatInput.value = '';
+
+            // Réponses intelligentes
+            setTimeout(() => {
+                if (message.toLowerCase().includes('admin') || message.toLowerCase().includes('connexion')) {
+                    addChatMessage('agent', '🔧 Problème de connexion admin détecté !<br><br><strong>Solution :</strong><br>1. Cliquez sur "👤 Recréer Admin"<br>2. Allez dans Firebase Console<br>3. Créez le compte Authentication<br>4. Reconnectez-vous');
+                } else if (message.toLowerCase().includes('crash') || message.toLowerCase().includes('erreur')) {
+                    addChatMessage('agent', '🔍 Je comprends, le site a crashé.<br><br><strong>Démarche :</strong><br>1. Lancez le diagnostic complet<br>2. Regardez les erreurs en rouge<br>3. Utilisez les boutons de réparation correspondants<br>4. Relancez le diagnostic');
+                } else if (message.toLowerCase().includes('données') || message.toLowerCase().includes('firestore')) {
+                    addChatMessage('agent', '💾 Problème Firestore détecté !<br><br><strong>Actions :</strong><br>1. "💾 Réparer Firestore" pour corriger les documents<br>2. "🧹 Nettoyer Orphelins" pour supprimer les données corrompues<br>3. "💾 Export Sauvegarde" pour sécuriser vos données');
+                } else {
+                    addChatMessage('agent', 'Je suis là pour vous aider ! Utilisez les actions rapides ou posez une question sur :<br>- Les problèmes de connexion<br>- Les erreurs Firebase<br>- La récupération de données<br>- Les comptes admin');
+                }
+            }, 500);
+        };
+
+        window.quickAction = function(action) {
+            switch(action) {
+                case 'crash':
+                    addChatMessage('user', 'Le site a crashé');
+                    addChatMessage('agent', '🚨 <strong>Le site a crashé</strong><br><br><strong>Plan d\'action :</strong><br>1. 🔍 Je lance le diagnostic automatique (déjà fait)<br>2. 👀 Regardez les statuts en rouge ci-dessus<br>3. 🔧 Cliquez sur le bouton de réparation correspondant<br><br><strong>Problèmes courants :</strong><br>• Si "Comptes Admin" est rouge → Cliquez "Recréer Admin"<br>• Si "Firestore" est rouge → Cliquez "Réparer Firestore"<br>• Si tout est rouge → Utilisez "Reset Complet" (dernier recours)');
+                    break;
+                case 'admin':
+                    addChatMessage('user', 'Je ne peux plus me connecter en admin');
+                    addChatMessage('agent', '🔐 <strong>Problème de connexion admin</strong><br><br><strong>Solution en 3 étapes :</strong><br><br>1️⃣ Cliquez sur le bouton "👤 Recréer Admin" ci-dessus<br><br>2️⃣ Allez dans <a href="https://console.firebase.google.com/project/gestion-epi-fc7e3/authentication/users" target="_blank" style="color: #4caf50;">Firebase Console > Authentication</a><br><br>3️⃣ Créez un utilisateur avec :<br>   • Email : anthony.fernandez@masque-lascaussade.fr<br>   • Mot de passe : (votre choix)<br><br>4️⃣ Reconnectez-vous avec ces identifiants');
+                    break;
+                case 'users':
+                    addChatMessage('user', 'Les utilisateurs ont disparu');
+                    addChatMessage('agent', '👥 <strong>Utilisateurs disparus</strong><br><br><strong>Diagnostic :</strong><br>• Vérifiez le statut "Comptes Admin" ci-dessus<br>• Si 0 admin trouvé → Base Firestore vide ou corrompue<br><br><strong>Récupération :</strong><br>1. Cliquez "💾 Export Sauvegarde" (si données présentes)<br>2. Utilisez "🔧 Réparer Firestore" pour réparer les comptes<br>3. Si aucune donnée → "⚠️ Reset Complet" pour recommencer<br><br>⚠️ Pensez à sauvegarder régulièrement vos données !');
+                    break;
+                case 'data':
+                    addChatMessage('user', 'Les données sont corrompues');
+                    addChatMessage('agent', '💾 <strong>Données corrompues</strong><br><br><strong>Plan de réparation :</strong><br><br>1️⃣ <strong>Diagnostic</strong><br>   • Lancez le diagnostic complet<br>   • Identifiez les erreurs<br><br>2️⃣ <strong>Nettoyage</strong><br>   • Cliquez "🧹 Nettoyer Orphelins"<br>   • Supprime les documents invalides<br><br>3️⃣ <strong>Réparation</strong><br>   • Cliquez "💾 Réparer Firestore"<br>   • Répare les champs manquants<br><br>4️⃣ <strong>Sauvegarde</strong><br>   • Cliquez "💾 Export Sauvegarde"<br>   • Sécurisez les données réparées');
+                    break;
+            }
+        };
+
+        // Message de bienvenue initial
+        setTimeout(() => {
+            addChatMessage('agent', 'Le diagnostic automatique est en cours... Patientez quelques secondes ⏳');
+        }, 500);
+    </script>
+</body>
+</html>

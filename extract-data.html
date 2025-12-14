@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extraction Données LocalStorage</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-card h3 {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status.libre { background: #E8F5E9; color: #4CAF50; }
+        .status.attente { background: #FFF3E0; color: #FF9800; }
+        .status.occupe { background: #FFEBEE; color: #F44336; }
+        .status.inactif { background: #F5F5F5; color: #9E9E9E; }
+        .btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background: #5568d3;
+        }
+        .btn-secondary {
+            background: #6c757d;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            max-height: 400px;
+        }
+        .filter-section {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 8px 15px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Extraction des Données - Gestion Casiers PPVE</h1>
+        
+        <div class="stats" id="stats"></div>
+        
+        <div style="margin: 20px 0;">
+            <button class="btn" onclick="exportJSON()">📥 Télécharger JSON</button>
+            <button class="btn" onclick="exportCSV()">📥 Télécharger CSV</button>
+            <button class="btn btn-secondary" onclick="toggleRawData()">👁️ Voir/Masquer JSON Brut</button>
+        </div>
+        
+        <div id="raw-data" style="display: none;">
+            <h3>JSON Brut</h3>
+            <pre id="json-display"></pre>
+        </div>
+        
+        <div class="filter-section">
+            <button class="filter-btn active" onclick="filterData('all')">Tous</button>
+            <button class="filter-btn" onclick="filterData('LIBRE')">🟢 Libres</button>
+            <button class="filter-btn" onclick="filterData('EN ATTENTE')">🟠 En Attente</button>
+            <button class="filter-btn" onclick="filterData('OCCUPÉ')">🔴 Occupés</button>
+            <button class="filter-btn" onclick="filterData('INACTIF')">⚫ Inactifs</button>
+        </div>
+        
+        <div id="table-container"></div>
+    </div>
+
+    <script>
+        let allData = [];
+        let currentFilter = 'all';
+
+        function loadData() {
+            const stored = localStorage.getItem('ppve_lockers');
+            if (stored) {
+                try {
+                    allData = JSON.parse(stored);
+                    console.log('Données chargées:', allData.length, 'casiers');
+                    displayStats();
+                    displayTable();
+                    document.getElementById('json-display').textContent = JSON.stringify(allData, null, 2);
+                } catch (e) {
+                    alert('❌ Erreur lors de la lecture des données: ' + e.message);
+                }
+            } else {
+                alert('⚠️ Aucune donnée trouvée dans le localStorage.\n\nAssurez-vous d\'avoir ouvert gestion-casiers.html au moins une fois.');
+            }
+        }
+
+        function displayStats() {
+            const stats = {
+                total: allData.length,
+                libre: allData.filter(l => l.statut === 'LIBRE').length,
+                attente: allData.filter(l => l.statut === 'EN ATTENTE').length,
+                occupe: allData.filter(l => l.statut === 'OCCUPÉ').length,
+                inactif: allData.filter(l => l.statut === 'INACTIF').length
+            };
+
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card">
+                    <h3>TOTAL</h3>
+                    <div class="number">${stats.total}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>🟢 LIBRES</h3>
+                    <div class="number" style="color: #4CAF50;">${stats.libre}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>🟠 EN ATTENTE</h3>
+                    <div class="number" style="color: #FF9800;">${stats.attente}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>🔴 OCCUPÉS</h3>
+                    <div class="number" style="color: #F44336;">${stats.occupe}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>⚫ INACTIFS</h3>
+                    <div class="number" style="color: #9E9E9E;">${stats.inactif}</div>
+                </div>
+            `;
+        }
+
+        function filterData(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            displayTable();
+        }
+
+        function displayTable() {
+            let filtered = currentFilter === 'all' ? allData : allData.filter(l => l.statut === currentFilter);
+            
+            let html = `
+                <h3>📋 Casiers (${filtered.length})</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Casier</th>
+                            <th>Plateforme</th>
+                            <th>Statut</th>
+                            <th>Prénom</th>
+                            <th>Nom</th>
+                            <th>Réf. Masque</th>
+                            <th>Réf. Tuyau</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            filtered.forEach(locker => {
+                const statusClass = locker.statut.toLowerCase().replace(' ', '-').replace('é', 'e');
+                html += `
+                    <tr>
+                        <td><strong>${locker.id}</strong></td>
+                        <td>${locker.platform}</td>
+                        <td><span class="status ${statusClass}">${locker.statut}</span></td>
+                        <td>${locker.prenom || '-'}</td>
+                        <td>${locker.nom || '-'}</td>
+                        <td>${locker.refMasque || '-'}</td>
+                        <td>${locker.refTuyau || '-'}</td>
+                        <td>${locker.date || '-'}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            document.getElementById('table-container').innerHTML = html;
+        }
+
+        function exportJSON() {
+            const dataStr = JSON.stringify(allData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `casiers-ppve-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportCSV() {
+            let csv = 'Casier;Plateforme;Statut;Prénom;Nom;Réf. Masque;Réf. Tuyau;Date\n';
+            
+            allData.forEach(locker => {
+                csv += `${locker.id};${locker.platform};${locker.statut};${locker.prenom};${locker.nom};${locker.refMasque};${locker.refTuyau};${locker.date}\n`;
+            });
+
+            const dataBlob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `casiers-ppve-${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function toggleRawData() {
+            const elem = document.getElementById('raw-data');
+            elem.style.display = elem.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Chargement au démarrage
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
