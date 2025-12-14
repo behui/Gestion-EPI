@@ -117,19 +117,28 @@
             <h1>Gestion Unifiée PPVE <span style="font-size:0.7em;color:#764ba2;">Digit 2.0</span></h1>
             <p>Suivi centralisé des casiers et équipements de ventilation</p>
         </div>
-        <div class="dashboard" id="dashboard">
-            <!-- KPIs dynamiques -->
+        <!-- DASHBOARD STYLE VITRINEMASQUE -->
+        <div id="dashboard-vitrine" style="margin-bottom:40px;">
+            <div style="background:white;border-radius:20px;padding:24px 18px 10px 18px;box-shadow:0 10px 40px rgba(0,0,0,0.10);margin-bottom:18px;">
+                <h1 style="color:#667eea;font-size:2.2em;font-weight:800;margin-bottom:6px;">Gestion Unifiée PPVE <span style="font-size:0.7em;color:#764ba2;">Digit 2.0</span></h1>
+                <p style="color:#64748b;font-size:1.1em;">Vision globale et statistiques industrielles</p>
+            </div>
+            <!-- STATS PLATEFORMES -->
+            <div id="stats-plateformes" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px;"></div>
+            <!-- DASHBOARD STATUTS -->
+            <div id="statuts-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:18px;"></div>
+            <!-- RECHERCHE CASIERS -->
+            <div style="margin-bottom:18px;"><input id="search-casier" class="search-input" style="width:100%;max-width:400px;" placeholder="🔍 Rechercher un casier..." oninput="setCasiersSearch(this.value)"></div>
+            <!-- INFO RÉSULTATS -->
+            <div id="result-info" style="padding:12px 0 8px 0;color:#667eea;font-weight:700;"></div>
+            <!-- GRILLE CASIERS -->
+            <div id="casiers-grid" class="casiers-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;"></div>
         </div>
+        <!-- Onglets équipements (Pika) -->
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('casiers')">🏭 Casiers</button>
-            <button class="tab" onclick="switchTab('equipements')">📊 Équipements</button>
+            <button class="tab active" onclick="switchTab('equipements')">📊 Équipements</button>
         </div>
-        <div class="tab-content active" id="content-casiers">
-            <!-- Gestion des casiers (reprend et améliore gestion-casiers.html) -->
-            <div id="casiers-app"></div>
-        </div>
-        <div class="tab-content" id="content-equipements">
-            <!-- Gestion des équipements (reprend et améliore Antho.html) -->
+        <div class="tab-content active" id="content-equipements">
             <div id="equipements-app"></div>
         </div>
     </div>
