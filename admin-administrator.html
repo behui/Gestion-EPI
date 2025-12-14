@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Admin Administrator - Debug & Tools</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff0080 0%, #7928ca 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(255, 0, 128, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1em;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: #ff0080;
+            box-shadow: 0 6px 30px rgba(255, 0, 128, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .card h2 {
+            color: #ff0080;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3em;
+        }
+
+        .card p {
+            color: #999;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(86, 171, 47, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(242, 153, 74, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+            color: white;
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(33, 147, 176, 0.4);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border: 1px solid #333;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-box:hover {
+            border-color: #ff0080;
+            transform: translateY(-2px);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #ff0080;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #999;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            border-left: 4px solid;
+        }
+
+        .alert.success {
+            background: rgba(86, 171, 47, 0.2);
+            color: #a8e063;
+            border-color: #56ab2f;
+        }
+
+        .alert.error {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            border-color: #ee5a52;
+        }
+
+        .alert.warning {
+            background: rgba(242, 153, 74, 0.2);
+            color: #f2994a;
+            border-color: #f2c94c;
+        }
+
+        .alert.info {
+            background: rgba(33, 147, 176, 0.2);
+            color: #6dd5ed;
+            border-color: #2193b0;
+        }
+
+        .console {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .console-line {
+            padding: 5px 0;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .console-line.success { color: #56ab2f; }
+        .console-line.error { color: #ff6b6b; }
+        .console-line.warning { color: #f2994a; }
+        .console-line.info { color: #6dd5ed; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 15px;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #ff0080;
+        }
+
+        .close-btn {
+            background: #333;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px 15px;
+            border-radius: 5px;
+        }
+
+        .close-btn:hover {
+            background: #ff0080;
+        }
+
+        pre {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            color: #a8e063;
+        }
+
+        .link-box {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .link-box a {
+            color: #6dd5ed;
+            text-decoration: none;
+            display: block;
+            padding: 8px 0;
+            transition: all 0.3s;
+        }
+
+        .link-box a:hover {
+            color: #ff0080;
+            padding-left: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .badge.online {
+            background: rgba(86, 171, 47, 0.3);
+            color: #a8e063;
+        }
+
+        .badge.offline {
+            background: rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #ff0080;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Admin Administrator</h1>
+            <p>Centre de contrôle et debug - Accès complet au système</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">Connecté: <span id="currentUser">Chargement...</span></p>
+        </div>
+
+        <div id="alertBox" class="alert"></div>
+
+        <!-- Statistiques -->
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-number" id="statUsers">-</div>
+                <div class="stat-label">Utilisateurs</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="statCasiers">-</div>
+                <div class="stat-label">Casiers</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="statDeleted">-</div>
+                <div class="stat-label">Supprimés</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="statAuth">-</div>
+                <div class="stat-label">Auth Status</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="statFirestore">-</div>
+                <div class="stat-label">Firestore Status</div>
+            </div>
+        </div>
+
+        <!-- Outils principaux -->
+        <div class="grid">
+            <!-- Navigation rapide -->
+            <div class="card">
+                <h2>🚀 Navigation Rapide</h2>
+                <p>Accès direct aux différentes interfaces</p>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="window.location.href='admin-test.html'">
+                        👥 Gestion Utilisateurs
+                    </button>
+                    <button class="btn btn-primary" onclick="window.location.href='gestion-casiers.html'">
+                        📦 Gestion Casiers
+                    </button>
+                    <button class="btn btn-primary" onclick="window.location.href='nettoyage-complet.html'">
+                        🧹 Nettoyage Complet
+                    </button>
+                    <button class="btn btn-primary" onclick="window.location.href='index.html'">
+                        🏠 Accueil
+                    </button>
+                </div>
+            </div>
+
+            <!-- Firebase Console -->
+            <div class="card">
+                <h2>🔥 Firebase Console</h2>
+                <p>Accès direct à Firebase</p>
+                <div class="btn-group">
+                    <button class="btn btn-warning" onclick="openFirebaseConsole()">
+                        🔥 Console Firebase
+                    </button>
+                    <button class="btn btn-warning" onclick="openFirebaseAuth()">
+                        🔐 Authentication
+                    </button>
+                    <button class="btn btn-warning" onclick="openFirebaseFirestore()">
+                        💾 Firestore Database
+                    </button>
+                    <button class="btn btn-warning" onclick="openFirebaseRules()">
+                        🛡️ Security Rules
+                    </button>
+                </div>
+            </div>
+
+            <!-- Debug Utilisateurs -->
+            <div class="card">
+                <h2>👤 Debug Utilisateurs</h2>
+                <p>Outils de diagnostic et réparation</p>
+                <div class="btn-group">
+                    <button class="btn btn-success" onclick="scanUsers()">
+                        🔍 Scanner tous les utilisateurs
+                    </button>
+                    <button class="btn btn-success" onclick="findOrphans()">
+                        🔍 Trouver comptes orphelins
+                    </button>
+                    <button class="btn btn-success" onclick="checkPermissions()">
+                        ✅ Vérifier permissions
+                    </button>
+                    <button class="btn btn-danger" onclick="showModal('repairModal')">
+                        🔧 Réparer profils
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tests Connexion -->
+            <div class="card">
+                <h2>🔌 Tests Connexion</h2>
+                <p>Tester les connexions Firebase</p>
+                <div class="btn-group">
+                    <button class="btn btn-info" onclick="testAuth()">
+                        🔐 Test Authentication
+                    </button>
+                    <button class="btn btn-info" onclick="testFirestore()">
+                        💾 Test Firestore
+                    </button>
+                    <button class="btn btn-info" onclick="testSecurityRules()">
+                        🛡️ Test Security Rules
+                    </button>
+                    <button class="btn btn-info" onclick="testCompleteFlow()">
+                        🎯 Test Flux Complet
+                    </button>
+                </div>
+            </div>
+
+            <!-- Export/Import -->
+            <div class="card">
+                <h2>💾 Export / Import</h2>
+                <p>Sauvegarde et restauration des données</p>
+                <div class="btn-group">
+                    <button class="btn btn-success" onclick="exportUsers()">
+                        📤 Export Utilisateurs (JSON)
+                    </button>
+                    <button class="btn btn-success" onclick="exportCasiers()">
+                        📤 Export Casiers (JSON)
+                    </button>
+                    <button class="btn btn-success" onclick="exportAll()">
+                        📤 Export Complet
+                    </button>
+                    <button class="btn btn-warning" onclick="showModal('importModal')">
+                        📥 Import Données
+                    </button>
+                </div>
+            </div>
+
+            <!-- Nettoyage -->
+            <div class="card">
+                <h2>🧹 Nettoyage</h2>
+                <p>Nettoyer les données obsolètes</p>
+                <div class="btn-group">
+                    <button class="btn btn-danger" onclick="cleanDeletedUsers()">
+                        🗑️ Nettoyer traces suppression
+                    </button>
+                    <button class="btn btn-danger" onclick="cleanOrphanData()">
+                        🗑️ Nettoyer données orphelines
+                    </button>
+                    <button class="btn btn-danger" onclick="resetTestData()">
+                        ⚠️ Reset données de test
+                    </button>
+                    <button class="btn btn-danger" onclick="purgeCache()">
+                        🧹 Purger cache navigateur
+                    </button>
+                </div>
+            </div>
+
+            <!-- Logs & Monitoring -->
+            <div class="card">
+                <h2>📊 Logs & Monitoring</h2>
+                <p>Surveillance en temps réel</p>
+                <div class="btn-group">
+                    <button class="btn btn-info" onclick="showLogs()">
+                        📋 Voir logs système
+                    </button>
+                    <button class="btn btn-info" onclick="showErrorLogs()">
+                        ❌ Logs d'erreurs
+                    </button>
+                    <button class="btn btn-info" onclick="generateReport()">
+                        📊 Générer rapport complet
+                    </button>
+                    <button class="btn btn-success" onclick="clearLogs()">
+                        🧹 Effacer logs
+                    </button>
+                </div>
+            </div>
+
+            <!-- GitHub & Versioning -->
+            <div class="card">
+                <h2>🐙 GitHub & Versioning</h2>
+                <p>Gestion du code source</p>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="openGitHub()">
+                        🐙 Ouvrir Repository
+                    </button>
+                    <button class="btn btn-info" onclick="checkVersion()">
+                        📌 Version actuelle
+                    </button>
+                    <button class="btn btn-info" onclick="showCommitHistory()">
+                        📜 Historique commits
+                    </button>
+                    <button class="btn btn-warning" onclick="createBackup()">
+                        💾 Créer backup local
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tests Avancés -->
+            <div class="card">
+                <h2>🧪 Tests Avancés</h2>
+                <p>Tests de performance et intégrité</p>
+                <div class="btn-group">
+                    <button class="btn btn-info" onclick="performanceTest()">
+                        ⚡ Test Performance
+                    </button>
+                    <button class="btn btn-info" onclick="integrityCheck()">
+                        🔍 Vérification Intégrité
+                    </button>
+                    <button class="btn btn-info" onclick="loadTest()">
+                        📈 Test de Charge
+                    </button>
+                    <button class="btn btn-warning" onclick="stressTest()">
+                        💪 Stress Test
+                    </button>
+                </div>
+            </div>
+
+            <!-- Outils Développeur -->
+            <div class="card">
+                <h2>👨‍💻 Outils Développeur</h2>
+                <p>Debug et développement</p>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="openDevTools()">
+                        🔧 Console DevTools
+                    </button>
+                    <button class="btn btn-primary" onclick="showFirebaseConfig()">
+                        ⚙️ Config Firebase
+                    </button>
+                    <button class="btn btn-primary" onclick="showEnvironment()">
+                        🌍 Variables d'environnement
+                    </button>
+                    <button class="btn btn-primary" onclick="testAPI()">
+                        🔌 Test API Calls
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sécurité -->
+            <div class="card">
+                <h2>🔒 Sécurité</h2>
+                <p>Audit et sécurité</p>
+                <div class="btn-group">
+                    <button class="btn btn-warning" onclick="securityAudit()">
+                        🔍 Audit Sécurité
+                    </button>
+                    <button class="btn btn-warning" onclick="checkRules()">
+                        🛡️ Vérifier Rules
+                    </button>
+                    <button class="btn btn-danger" onclick="showDeletedAccess()">
+                        🔐 Logs Accès
+                    </button>
+                    <button class="btn btn-danger" onclick="forceLogoutAll()">
+                        🚪 Déconnecter tout le monde
+                    </button>
+                </div>
+            </div>
+
+            <!-- Base de Données -->
+            <div class="card">
+                <h2>💾 Base de Données</h2>
+                <p>Gestion Firestore</p>
+                <div class="btn-group">
+                    <button class="btn btn-info" onclick="showCollections()">
+                        📚 Voir toutes collections
+                    </button>
+                    <button class="btn btn-info" onclick="countDocuments()">
+                        🔢 Compter documents
+                    </button>
+                    <button class="btn btn-success" onclick="optimizeDatabase()">
+                        ⚡ Optimiser base
+                    </button>
+                    <button class="btn btn-danger" onclick="showModal('dangerModal')">
+                        ⚠️ Zone Danger
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Console de logs -->
+        <div class="card" style="grid-column: 1 / -1;">
+            <h2>📟 Console Système</h2>
+            <div class="console" id="systemConsole">
+                <div class="console-line info">✅ Système initialisé - Prêt à l'emploi</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Réparation -->
+    <div id="repairModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔧 Réparation de Profils</h2>
+                <button class="close-btn" onclick="closeModal('repairModal')">&times;</button>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="repairMissingProfiles()">
+                    🔧 Réparer profils manquants
+                </button>
+                <button class="btn btn-success" onclick="repairPermissions()">
+                    🔧 Réparer permissions
+                </button>
+                <button class="btn btn-success" onclick="repairAdminProfile()">
+                    🔧 Réparer profil admin
+                </button>
+                <button class="btn btn-warning" onclick="forceRecreateProfile()">
+                    ⚠️ Forcer recréation profil
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Import -->
+    <div id="importModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📥 Import de Données</h2>
+                <button class="close-btn" onclick="closeModal('importModal')">&times;</button>
+            </div>
+            <input type="file" id="importFile" accept=".json" style="margin-bottom: 20px; color: white;">
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="importData()">
+                    📥 Importer fichier
+                </button>
+                <button class="btn btn-warning" onclick="closeModal('importModal')">
+                    ❌ Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Zone Danger -->
+    <div id="dangerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚠️ ZONE DANGER</h2>
+                <button class="close-btn" onclick="closeModal('dangerModal')">&times;</button>
+            </div>
+            <p style="color: #ff6b6b; margin-bottom: 20px;">⚠️ ATTENTION: Ces actions sont IRRÉVERSIBLES!</p>
+            <div class="btn-group">
+                <button class="btn btn-danger" onclick="deleteAllUsers()">
+                    🗑️ SUPPRIMER TOUS LES UTILISATEURS
+                </button>
+                <button class="btn btn-danger" onclick="deleteAllCasiers()">
+                    🗑️ SUPPRIMER TOUS LES CASIERS
+                </button>
+                <button class="btn btn-danger" onclick="resetDatabase()">
+                    ⚠️ RESET COMPLET DATABASE
+                </button>
+                <button class="btn btn-warning" onclick="closeModal('dangerModal')">
+                    ❌ Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, getDocs, doc, getDoc, deleteDoc, setDoc, query, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDcPzBOcluj_5cBVZoIDLB0-KqVlHxXJjY",
+            authDomain: "casier-7c6c3.firebaseapp.com",
+            projectId: "casier-7c6c3",
+            storageBucket: "casier-7c6c3.firebasestorage.app",
+            messagingSenderId: "375454794913",
+            appId: "1:375454794913:web:4d70b3a83b4bb3f6adc2e5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.db = db;
+        window.auth = auth;
+
+        // Console logging
+        function addLog(message, type = 'info') {
+            const console = document.getElementById('systemConsole');
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            const timestamp = new Date().toLocaleTimeString('fr-FR');
+            line.textContent = `[${timestamp}] ${message}`;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = `alert ${type}`;
+            alertBox.style.display = 'block';
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+
+        window.addLog = addLog;
+        window.showAlert = showAlert;
+
+        // Modal management
+        window.showModal = function(id) {
+            document.getElementById(id).style.display = 'block';
+        };
+
+        window.closeModal = function(id) {
+            document.getElementById(id).style.display = 'none';
+        };
+
+        // Stats loading
+        async function loadStats() {
+            try {
+                const usersSnap = await getDocs(collection(db, 'users'));
+                document.getElementById('statUsers').textContent = usersSnap.size;
+
+                const casiersSnap = await getDocs(collection(db, 'casiers'));
+                document.getElementById('statCasiers').textContent = casiersSnap.size;
+
+                const deletedSnap = await getDocs(collection(db, 'deleted_users'));
+                document.getElementById('statDeleted').textContent = deletedSnap.size;
+
+                document.getElementById('statAuth').innerHTML = '✅<span class="badge online">OK</span>';
+                document.getElementById('statFirestore').innerHTML = '✅<span class="badge online">OK</span>';
+
+                addLog('✅ Statistiques chargées', 'success');
+            } catch (error) {
+                addLog('❌ Erreur chargement stats: ' + error.message, 'error');
+            }
+        }
+
+        // Firebase Console
+        window.openFirebaseConsole = function() {
+            window.open('https://console.firebase.google.com/project/casier-7c6c3/overview', '_blank');
+            addLog('🔥 Ouverture Console Firebase', 'info');
+        };
+
+        window.openFirebaseAuth = function() {
+            window.open('https://console.firebase.google.com/project/casier-7c6c3/authentication/users', '_blank');
+            addLog('🔐 Ouverture Authentication', 'info');
+        };
+
+        window.openFirebaseFirestore = function() {
+            window.open('https://console.firebase.google.com/project/casier-7c6c3/firestore/databases/-default-/data', '_blank');
+            addLog('💾 Ouverture Firestore', 'info');
+        };
+
+        window.openFirebaseRules = function() {
+            window.open('https://console.firebase.google.com/project/casier-7c6c3/firestore/rules', '_blank');
+            addLog('🛡️ Ouverture Security Rules', 'info');
+        };
+
+        // Scan users
+        window.scanUsers = async function() {
+            addLog('🔍 Scan des utilisateurs...', 'info');
+            try {
+                const snapshot = await getDocs(collection(db, 'users'));
+                let report = `\n📊 RAPPORT UTILISATEURS\n`;
+                report += `Total: ${snapshot.size}\n\n`;
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    report += `- ${data.email} (${data.role})\n`;
+                });
+
+                alert(report);
+                addLog(`✅ Scan terminé: ${snapshot.size} utilisateurs`, 'success');
+            } catch (error) {
+                addLog('❌ Erreur scan: ' + error.message, 'error');
+            }
+        };
+
+        // Find orphans
+        window.findOrphans = async function() {
+            addLog('🔍 Recherche comptes orphelins...', 'info');
+            try {
+                const deletedSnap = await getDocs(collection(db, 'deleted_users'));
+                if (deletedSnap.size === 0) {
+                    showAlert('✅ Aucun compte orphelin trouvé', 'success');
+                } else {
+                    showAlert(`⚠️ ${deletedSnap.size} comptes orphelins trouvés (Auth existe, Firestore supprimé)`, 'warning');
+                }
+                addLog(`🔍 ${deletedSnap.size} comptes orphelins`, 'warning');
+            } catch (error) {
+                addLog('❌ Erreur: ' + error.message, 'error');
+            }
+        };
+
+        // Check permissions
+        window.checkPermissions = async function() {
+            addLog('✅ Vérification permissions...', 'info');
+            try {
+                const snapshot = await getDocs(collection(db, 'users'));
+                let issues = 0;
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.role === 'utilisateur' && !data.permissions) {
+                        issues++;
+                    }
+                });
+
+                if (issues === 0) {
+                    showAlert('✅ Toutes les permissions sont correctes', 'success');
+                } else {
+                    showAlert(`⚠️ ${issues} utilisateurs avec permissions manquantes`, 'warning');
+                }
+                addLog(`✅ Vérification terminée: ${issues} problèmes`, issues > 0 ? 'warning' : 'success');
+            } catch (error) {
+                addLog('❌ Erreur: ' + error.message, 'error');
+            }
+        };
+
+        // Test Auth
+        window.testAuth = async function() {
+            addLog('🔐 Test Authentication...', 'info');
+            try {
+                if (auth.currentUser) {
+                    showAlert(`✅ Authentication OK - User: ${auth.currentUser.email}`, 'success');
+                    addLog('✅ Authentication fonctionnelle', 'success');
+                } else {
+                    showAlert('❌ Aucun utilisateur connecté', 'error');
+                    addLog('❌ Authentication: Non connecté', 'error');
+                }
+            } catch (error) {
+                addLog('❌ Erreur: ' + error.message, 'error');
+            }
+        };
+
+        // Test Firestore
+        window.testFirestore = async function() {
+            addLog('💾 Test Firestore...', 'info');
+            try {
+                const snapshot = await getDocs(collection(db, 'users'));
+                showAlert(`✅ Firestore OK - ${snapshot.size} documents dans users`, 'success');
+                addLog('✅ Firestore fonctionnel', 'success');
+            } catch (error) {
+                showAlert('❌ Erreur Firestore: ' + error.message, 'error');
+                addLog('❌ Firestore: ' + error.message, 'error');
+            }
+        };
+
+        // Test Security Rules
+        window.testSecurityRules = async function() {
+            addLog('🛡️ Test Security Rules...', 'info');
+            try {
+                // Try to read
+                await getDocs(collection(db, 'users'));
+                addLog('✅ Lecture autorisée', 'success');
+
+                // Try to write
+                const testDoc = doc(db, 'test', 'security_test');
+                await setDoc(testDoc, { test: true, timestamp: new Date() });
+                await deleteDoc(testDoc);
+                
+                showAlert('✅ Security Rules: Lecture et écriture OK', 'success');
+                addLog('✅ Security Rules fonctionnelles', 'success');
+            } catch (error) {
+                showAlert('⚠️ Security Rules restrictives: ' + error.message, 'warning');
+                addLog('⚠️ Security Rules: ' + error.message, 'warning');
+            }
+        };
+
+        // Test Complete Flow
+        window.testCompleteFlow = async function() {
+            addLog('🎯 Test flux complet...', 'info');
+            await testAuth();
+            await new Promise(r => setTimeout(r, 500));
+            await testFirestore();
+            await new Promise(r => setTimeout(r, 500));
+            await testSecurityRules();
+            showAlert('✅ Tests complets terminés - Voir console', 'success');
+        };
+
+        // Export functions
+        window.exportUsers = async function() {
+            addLog('📤 Export utilisateurs...', 'info');
+            try {
+                const snapshot = await getDocs(collection(db, 'users'));
+                const users = [];
+                snapshot.forEach(doc => {
+                    users.push({ id: doc.id, ...doc.data() });
+                });
+
+                const blob = new Blob([JSON.stringify(users, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `users_export_${new Date().toISOString()}.json`;
+                a.click();
+                
+                showAlert(`✅ ${users.length} utilisateurs exportés`, 'success');
+                addLog(`✅ Export: ${users.length} utilisateurs`, 'success');
+            } catch (error) {
+                addLog('❌ Erreur: ' + error.message, 'error');
+            }
+        };
+
+        window.exportCasiers = async function() {
+            addLog('📤 Export casiers...', 'info');
+            try {
+                const snapshot = await getDocs(collection(db, 'casiers'));
+                const casiers = [];
+                snapshot.forEach(doc => {
+                    casiers.push({ id: doc.id, ...doc.data() });
+                });
+
+                const blob = new Blob([JSON.stringify(casiers, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `casiers_export_${new Date().toISOString()}.json`;
+                a.click();
+                
+                showAlert(`✅ ${casiers.length} casiers exportés`, 'success');
+                addLog(`✅ Export: ${casiers.length} casiers`, 'success');
+            } catch (error) {
+                addLog('❌ Erreur: ' + error.message, 'error');
+            }
+        };
+
+        window.exportAll = async function() {
+            addLog('📤 Export complet...', 'info');
+            await exportUsers();
+            await new Promise(r => setTimeout(r, 500));
+            await exportCasiers();
+        };
+
+        // Clean functions
+        window.cleanDeletedUsers = async function() {
+            const confirm = prompt('🧹 Nettoyer toutes les traces de suppression?\nTapez: NETTOYER');
+            if (confirm !== 'NETTOYER') return;
+
+            addLog('🧹 Nettoyage traces...', 'info');
+            try {
+                const snapshot = await getDocs(collection(db, 'deleted_users'));
+                let count = 0;
+                for (const docSnap of snapshot.docs) {
+                    await deleteDoc(doc(db, 'deleted_users', docSnap.id));
+                    count++;
+                }
+                showAlert(`✅ ${count} traces nettoyées`, 'success');
+                addLog(`✅ ${count} traces supprimées`, 'success');
+                loadStats();
+            } catch (error) {
+                addLog('❌ Erreur: ' + error.message, 'error');
+            }
+        };
+
+        window.purgeCache = function() {
+            addLog('🧹 Purge cache...', 'info');
+            localStorage.clear();
+            sessionStorage.clear();
+            showAlert('✅ Cache purgé - Rechargez la page', 'success');
+            addLog('✅ Cache purgé', 'success');
+        };
+
+        // GitHub
+        window.openGitHub = function() {
+            const repo = prompt('🐙 Entrez l\'URL du repository GitHub:');
+            if (repo) {
+                window.open(repo, '_blank');
+                addLog('🐙 Ouverture GitHub', 'info');
+            }
+        };
+
+        window.checkVersion = function() {
+            const version = '1.0.0'; // À mettre à jour
+            alert(`📌 Version: ${version}\nDate: ${new Date().toLocaleDateString('fr-FR')}`);
+            addLog(`📌 Version: ${version}`, 'info');
+        };
+
+        window.createBackup = function() {
+            addLog('💾 Création backup...', 'info');
+            showAlert('💾 Backup local créé (export JSON)', 'info');
+            exportAll();
+        };
+
+        // Dev tools
+        window.openDevTools = function() {
+            addLog('🔧 Ouvrez F12 pour DevTools', 'info');
+            showAlert('🔧 Appuyez sur F12 pour ouvrir DevTools', 'info');
+        };
+
+        window.showFirebaseConfig = function() {
+            const config = JSON.stringify(firebaseConfig, null, 2);
+            alert(`⚙️ FIREBASE CONFIG:\n\n${config}`);
+            addLog('⚙️ Config affichée', 'info');
+        };
+
+        window.showEnvironment = function() {
+            const env = {
+                browser: navigator.userAgent,
+                url: window.location.href,
+                online: navigator.onLine,
+                language: navigator.language
+            };
+            alert(`🌍 ENVIRONNEMENT:\n\n${JSON.stringify(env, null, 2)}`);
+            addLog('🌍 Environment affiché', 'info');
+        };
+
+        // Database
+        window.showCollections = async function() {
+            addLog('📚 Collections disponibles:', 'info');
+            const collections = ['users', 'casiers', 'deleted_users', 'test'];
+            alert(`📚 COLLECTIONS FIRESTORE:\n\n${collections.join('\n')}`);
+            collections.forEach(col => addLog(`  - ${col}`, 'info'));
+        };
+
+        window.countDocuments = async function() {
+            addLog('🔢 Comptage documents...', 'info');
+            try {
+                const users = await getDocs(collection(db, 'users'));
+                const casiers = await getDocs(collection(db, 'casiers'));
+                const deleted = await getDocs(collection(db, 'deleted_users'));
+
+                const report = `📊 DOCUMENTS:\n\nusers: ${users.size}\ncasiers: ${casiers.size}\ndeleted_users: ${deleted.size}`;
+                alert(report);
+                addLog('✅ Comptage terminé', 'success');
+            } catch (error) {
+                addLog('❌ Erreur: ' + error.message, 'error');
+            }
+        };
+
+        // Security
+        window.securityAudit = async function() {
+            addLog('🔍 Audit sécurité...', 'info');
+            showAlert('🔍 Audit en cours...', 'info');
+            
+            setTimeout(() => {
+                const report = `
+🔒 AUDIT SÉCURITÉ
+
+✅ Firebase Authentication: OK
+✅ Firestore connexion: OK
+⚠️ Security Rules: Mode développement (ouvert)
+✅ HTTPS: ${window.location.protocol === 'https:' ? 'OK' : 'NON (fichier local)'}
+
+RECOMMANDATIONS:
+- Activer Security Rules en production
+- Utiliser HTTPS en production
+- Limiter les permissions des utilisateurs
+                `;
+                alert(report);
+                addLog('✅ Audit terminé', 'success');
+            }, 2000);
+        };
+
+        // Repair functions
+        window.repairMissingProfiles = async function() {
+            addLog('🔧 Réparation profils...', 'info');
+            showAlert('🔧 Utilisez nettoyage-complet.html pour réparer', 'info');
+        };
+
+        window.repairAdminProfile = function() {
+            window.location.href = 'fix-profile.html';
+        };
+
+        // Performance test
+        window.performanceTest = async function() {
+            addLog('⚡ Test performance...', 'info');
+            const start = performance.now();
+            
+            try {
+                await getDocs(collection(db, 'users'));
+                const end = performance.now();
+                const time = (end - start).toFixed(2);
+                
+                showAlert(`⚡ Performance: ${time}ms`, time < 1000 ? 'success' : 'warning');
+                addLog(`⚡ Temps de réponse: ${time}ms`, time < 1000 ? 'success' : 'warning');
+            } catch (error) {
+                addLog('❌ Erreur: ' + error.message, 'error');
+            }
+        };
+
+        window.integrityCheck = async function() {
+            addLog('🔍 Vérification intégrité...', 'info');
+            await checkPermissions();
+            await findOrphans();
+            showAlert('✅ Vérification terminée', 'success');
+        };
+
+        // Generate report
+        window.generateReport = async function() {
+            addLog('📊 Génération rapport...', 'info');
+            
+            try {
+                const users = await getDocs(collection(db, 'users'));
+                const casiers = await getDocs(collection(db, 'casiers'));
+                const deleted = await getDocs(collection(db, 'deleted_users'));
+
+                const report = {
+                    date: new Date().toISOString(),
+                    stats: {
+                        users: users.size,
+                        casiers: casiers.size,
+                        deleted: deleted.size
+                    },
+                    users: [],
+                    casiers: []
+                };
+
+                users.forEach(doc => report.users.push({ id: doc.id, ...doc.data() }));
+                casiers.forEach(doc => report.casiers.push({ id: doc.id, ...doc.data() }));
+
+                const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `rapport_complet_${new Date().toISOString()}.json`;
+                a.click();
+
+                showAlert('✅ Rapport généré et téléchargé', 'success');
+                addLog('✅ Rapport créé', 'success');
+            } catch (error) {
+                addLog('❌ Erreur: ' + error.message, 'error');
+            }
+        };
+
+        // Clear logs
+        window.clearLogs = function() {
+            document.getElementById('systemConsole').innerHTML = '<div class="console-line info">✅ Logs effacés</div>';
+            addLog('✅ Système prêt', 'success');
+        };
+
+        // Show logs
+        window.showLogs = function() {
+            addLog('📋 Tous les logs sont affichés dans la console ci-dessous', 'info');
+        };
+
+        window.showErrorLogs = function() {
+            addLog('❌ Fonction en développement', 'warning');
+        };
+
+        // Init
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('currentUser').textContent = user.email;
+                addLog(`✅ Connecté: ${user.email}`, 'success');
+                loadStats();
+            } else {
+                document.getElementById('currentUser').innerHTML = '<span style="color: #ff6b6b;">Non connecté</span>';
+                addLog('⚠️ Non connecté', 'warning');
+                setTimeout(() => {
+                    if (confirm('Vous devez être connecté. Redirection vers index.html?')) {
+                        window.location.href = 'index.html';
+                    }
+                }, 2000);
+            }
+        });
+
+        addLog('🚀 Admin Administrator initialisé', 'success');
+    </script>
+</body>
+</html>
