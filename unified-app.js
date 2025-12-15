@@ -225,42 +225,42 @@ function renderCasiers() {
     const totalCasiers = lockers.length; // Total dynamique
     html += `<p style="color:#64748b;font-size:0.95em;margin:0 0 20px 0;">Cliquez sur une carte pour filtrer par statut • Total: <strong>${totalCasiers} casiers</strong></p>`;
     
-    html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:25px;">';
+    html += '<div class="stats-cards-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:25px;">';
     
     // Carte LIBRE avec état actif/inactif
     const isLibreActive = currentStatutFilter === 'LIBRE';
-    html += `<div onclick="filtrerParStatut('LIBRE')" style="background:linear-gradient(135deg,#d1fae5 0%,#a7f3d0 100%);padding:15px;border-radius:12px;text-align:center;cursor:pointer;transition:all 0.3s;border:3px solid #10b981;${isLibreActive ? 'box-shadow:0 0 0 4px rgba(16,185,129,0.3);transform:scale(1.05);' : ''}" onmouseover="if(!${isLibreActive})this.style.transform='scale(1.05)'" onmouseout="if(!${isLibreActive})this.style.transform='scale(1)'">`;
-    html += `<div style="font-size:2.2em;font-weight:800;color:#065f46;">${stats.LIBRE}</div>`;
-    html += '<div style="font-size:0.85em;color:#065f46;font-weight:700;">🟢 LIBRE</div>';
-    html += `<div style="font-size:0.75em;color:#059669;margin-top:4px;">${(stats.LIBRE / totalCasiers * 100).toFixed(0)}%</div>`;
-    if (isLibreActive) html += '<div style="font-size:0.7em;color:#10b981;margin-top:6px;font-weight:800;">✓ ACTIF</div>';
+    html += `<div onclick="filtrerParStatut('LIBRE')" class="stat-card" style="background:linear-gradient(135deg,#d1fae5 0%,#a7f3d0 100%);padding:15px;border-radius:12px;text-align:center;cursor:pointer;transition:all 0.3s;border:3px solid #10b981;${isLibreActive ? 'box-shadow:0 0 0 4px rgba(16,185,129,0.3);transform:scale(1.05);' : ''}" onmouseover="if(!${isLibreActive})this.style.transform='scale(1.05)'" onmouseout="if(!${isLibreActive})this.style.transform='scale(1)'">`;
+    html += `<div class="stat-number" style="font-size:2.2em;font-weight:800;color:#065f46;">${stats.LIBRE}</div>`;
+    html += '<div class="stat-label" style="font-size:0.85em;color:#065f46;font-weight:700;">🟢 LIBRE</div>';
+    html += `<div class="stat-percent" style="font-size:0.75em;color:#059669;margin-top:4px;">${(stats.LIBRE / totalCasiers * 100).toFixed(0)}%</div>`;
+    if (isLibreActive) html += '<div class="stat-active" style="font-size:0.7em;color:#10b981;margin-top:6px;font-weight:800;">✓ ACTIF</div>';
     html += '</div>';
     
     // Carte EN ATTENTE avec état actif/inactif
     const isAttenteActive = currentStatutFilter === 'EN ATTENTE';
-    html += `<div onclick="filtrerParStatut('EN ATTENTE')" style="background:linear-gradient(135deg,#fef3c7 0%,#fde68a 100%);padding:15px;border-radius:12px;text-align:center;cursor:pointer;transition:all 0.3s;border:3px solid #f59e0b;${isAttenteActive ? 'box-shadow:0 0 0 4px rgba(245,158,11,0.3);transform:scale(1.05);' : ''}" onmouseover="if(!${isAttenteActive})this.style.transform='scale(1.05)'" onmouseout="if(!${isAttenteActive})this.style.transform='scale(1)'">`;
-    html += `<div style="font-size:2.2em;font-weight:800;color:#92400e;">${stats['EN ATTENTE']}</div>`;
-    html += '<div style="font-size:0.85em;color:#92400e;font-weight:700;">🟠 EN ATTENTE</div>';
-    html += `<div style="font-size:0.75em;color:#d97706;margin-top:4px;">${(stats['EN ATTENTE'] / totalCasiers * 100).toFixed(0)}%</div>`;
-    if (isAttenteActive) html += '<div style="font-size:0.7em;color:#f59e0b;margin-top:6px;font-weight:800;">✓ ACTIF</div>';
+    html += `<div onclick="filtrerParStatut('EN ATTENTE')" class="stat-card" style="background:linear-gradient(135deg,#fef3c7 0%,#fde68a 100%);padding:15px;border-radius:12px;text-align:center;cursor:pointer;transition:all 0.3s;border:3px solid #f59e0b;${isAttenteActive ? 'box-shadow:0 0 0 4px rgba(245,158,11,0.3);transform:scale(1.05);' : ''}" onmouseover="if(!${isAttenteActive})this.style.transform='scale(1.05)'" onmouseout="if(!${isAttenteActive})this.style.transform='scale(1)'">`;
+    html += `<div class="stat-number" style="font-size:2.2em;font-weight:800;color:#92400e;">${stats['EN ATTENTE']}</div>`;
+    html += '<div class="stat-label" style="font-size:0.85em;color:#92400e;font-weight:700;">🟠 EN ATTENTE</div>';
+    html += `<div class="stat-percent" style="font-size:0.75em;color:#d97706;margin-top:4px;">${(stats['EN ATTENTE'] / totalCasiers * 100).toFixed(0)}%</div>`;
+    if (isAttenteActive) html += '<div class="stat-active" style="font-size:0.7em;color:#f59e0b;margin-top:6px;font-weight:800;">✓ ACTIF</div>';
     html += '</div>';
     
     // Carte OCCUPÉ avec état actif/inactif
     const isOccupeActive = currentStatutFilter === 'OCCUPÉ';
-    html += `<div onclick="filtrerParStatut('OCCUPÉ')" style="background:linear-gradient(135deg,#fecaca 0%,#fca5a5 100%);padding:15px;border-radius:12px;text-align:center;cursor:pointer;transition:all 0.3s;border:3px solid #ef4444;${isOccupeActive ? 'box-shadow:0 0 0 4px rgba(239,68,68,0.3);transform:scale(1.05);' : ''}" onmouseover="if(!${isOccupeActive})this.style.transform='scale(1.05)'" onmouseout="if(!${isOccupeActive})this.style.transform='scale(1)'">`;
-    html += `<div style="font-size:2.2em;font-weight:800;color:#991b1b;">${stats['OCCUPÉ']}</div>`;
-    html += '<div style="font-size:0.85em;color:#991b1b;font-weight:700;">🔴 OCCUPÉ</div>';
-    html += `<div style="font-size:0.75em;color:#dc2626;margin-top:4px;">${(stats['OCCUPÉ'] / totalCasiers * 100).toFixed(0)}%</div>`;
-    if (isOccupeActive) html += '<div style="font-size:0.7em;color:#ef4444;margin-top:6px;font-weight:800;">✓ ACTIF</div>';
+    html += `<div onclick="filtrerParStatut('OCCUPÉ')" class="stat-card" style="background:linear-gradient(135deg,#fecaca 0%,#fca5a5 100%);padding:15px;border-radius:12px;text-align:center;cursor:pointer;transition:all 0.3s;border:3px solid #ef4444;${isOccupeActive ? 'box-shadow:0 0 0 4px rgba(239,68,68,0.3);transform:scale(1.05);' : ''}" onmouseover="if(!${isOccupeActive})this.style.transform='scale(1.05)'" onmouseout="if(!${isOccupeActive})this.style.transform='scale(1)'">`;
+    html += `<div class="stat-number" style="font-size:2.2em;font-weight:800;color:#991b1b;">${stats['OCCUPÉ']}</div>`;
+    html += '<div class="stat-label" style="font-size:0.85em;color:#991b1b;font-weight:700;">🔴 OCCUPÉ</div>';
+    html += `<div class="stat-percent" style="font-size:0.75em;color:#dc2626;margin-top:4px;">${(stats['OCCUPÉ'] / totalCasiers * 100).toFixed(0)}%</div>`;
+    if (isOccupeActive) html += '<div class="stat-active" style="font-size:0.7em;color:#ef4444;margin-top:6px;font-weight:800;">✓ ACTIF</div>';
     html += '</div>';
     
     // Carte INACTIF avec état actif/inactif
     const isInactifActive = currentStatutFilter === 'INACTIF';
-    html += `<div onclick="filtrerParStatut('INACTIF')" style="background:linear-gradient(135deg,#e2e8f0 0%,#cbd5e1 100%);padding:15px;border-radius:12px;text-align:center;cursor:pointer;transition:all 0.3s;border:3px solid #64748b;${isInactifActive ? 'box-shadow:0 0 0 4px rgba(100,116,139,0.3);transform:scale(1.05);' : ''}" onmouseover="if(!${isInactifActive})this.style.transform='scale(1.05)'" onmouseout="if(!${isInactifActive})this.style.transform='scale(1)'">`;
-    html += `<div style="font-size:2.2em;font-weight:800;color:#1e293b;">${stats['INACTIF']}</div>`;
-    html += '<div style="font-size:0.85em;color:#1e293b;font-weight:700;">⚫ INACTIF</div>';
-    html += `<div style="font-size:0.75em;color:#475569;margin-top:4px;">${(stats['INACTIF'] / totalCasiers * 100).toFixed(0)}%</div>`;
-    if (isInactifActive) html += '<div style="font-size:0.7em;color:#64748b;margin-top:6px;font-weight:800;">✓ ACTIF</div>';
+    html += `<div onclick="filtrerParStatut('INACTIF')" class="stat-card" style="background:linear-gradient(135deg,#e2e8f0 0%,#cbd5e1 100%);padding:15px;border-radius:12px;text-align:center;cursor:pointer;transition:all 0.3s;border:3px solid #64748b;${isInactifActive ? 'box-shadow:0 0 0 4px rgba(100,116,139,0.3);transform:scale(1.05);' : ''}" onmouseover="if(!${isInactifActive})this.style.transform='scale(1.05)'" onmouseout="if(!${isInactifActive})this.style.transform='scale(1)'">`;
+    html += `<div class="stat-number" style="font-size:2.2em;font-weight:800;color:#1e293b;">${stats['INACTIF']}</div>`;
+    html += '<div class="stat-label" style="font-size:0.85em;color:#1e293b;font-weight:700;">⚫ INACTIF</div>';
+    html += `<div class="stat-percent" style="font-size:0.75em;color:#475569;margin-top:4px;">${(stats['INACTIF'] / totalCasiers * 100).toFixed(0)}%</div>`;
+    if (isInactifActive) html += '<div class="stat-active" style="font-size:0.7em;color:#64748b;margin-top:6px;font-weight:800;">✓ ACTIF</div>';
     html += '</div>';
     
     html += '</div>';
