@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Unifiée PPVE - Digit 2.0</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Segoe+UI:400,700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* ========== RESPONSIVE GLOBAL ========== */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            font-size: 16px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 15px 40px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+            }
+            .container {
+                padding: 15px 10px 30px;
+            }
+        }
+        
+        /* Inputs responsive */
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"],
+        select,
+        textarea {
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1em;
+            outline: none;
+            transition: all 0.3s;
+            width: 100%;
+            touch-action: manipulation;
+        }
+        
+        @media (max-width: 768px) {
+            input[type="text"],
+            input[type="email"],
+            input[type="password"],
+            input[type="date"],
+            select,
+            textarea {
+                padding: 14px 16px;
+                font-size: 16px;
+                border-radius: 8px;
+            }
+        }
+        
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        /* Boutons responsive */
+        button {
+            cursor: pointer;
+            transition: all 0.3s;
+            touch-action: manipulation;
+            min-height: 44px;
+            font-size: 1em;
+            padding: 12px 20px;
+        }
+        
+        @media (max-width: 768px) {
+            button {
+                min-height: 48px;
+                font-size: 15px;
+                padding: 14px 20px;
+            }
+        }
+        
+        @media (hover: hover) {
+            button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            }
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        2.2em; line-height: 1.2; }
+        h2 { font-size: 1.6em; line-height: 1.3; }
+        h3 { font-size: 1.3em; line-height: 1.4; }
+        p { font-size: 1em; line-height: 1.6; }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 1.6em; }
+            h2 { font-size: 1.3em; }
+            h3 { font-size: 1.1em; }
+            p { font-size: 0.95em; }
+            
+            /* Cards de statut plus compactes sur mobile */
+            .stat-card {
+                padding: 10px 8px !important;
+                border-width: 2px !important;
+                border-radius: 8px !important;
+            }
+            
+            .stat-number {
+                font-size: 1.6em !important;
+            }
+            
+            .stat-label {
+                font-size: 0.75em !important;
+            }
+            
+            .stat-percent {
+                font-size: 0.7em !important;
+                margin-top: 2px !important;
+            }
+            
+            .stat-active {
+                font-size: 0.65em !important;
+                margin-top: 4px !important;
+            }
+            
+            .stats-cards-grid {
+                gap: 8px !important;
+                margin-bottom: 15px !important;
+            }
+            
+            /* Cards utilisateurs compactes sur mobile */
+            .user-filter-card {
+                padding: 8px 6px !important;
+            }
+            
+            .users-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+                gap: 10px !important;
+            }
+            
+            .user-card {
+                padding: 12px !important;
+                min-height: 200px !important;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- TITRE -->
+        <div style="background:white;border-radius:clamp(12px, 3vw, 20px);padding:clamp(15px, 4vw, 25px);box-shadow:0 10px 40px rgba(0,0,0,0.10);margin-bottom:clamp(15px, 3vw, 20px);text-align:center;">
+            <h1 style="color:#667eea;font-weight:800;margin:0 0 8px 0;line-height:1.2;">
+                🏭 Gestion Unifiée PPVE 
+                <span style="font-size:0.5em;color:#764ba2;font-weight:600;display:inline-block;">Digit 2.0</span>
+            </h1>
+            <p style="color:#64748b;margin:0;line-height:1.4;">Système complet de gestion industrielle</p>
+        </div>
+
+        <!-- NAVIGATION PRINCIPALE -->
+        <div style="background:white;border-radius:clamp(12px, 3vw, 20px);padding:clamp(12px, 2.5vw, 15px);box-shadow:0 10px 40px rgba(0,0,0,0.10);margin-bottom:clamp(20px, 4vw, 30px);">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(clamp(140px, 30vw, 180px),1fr));gap:clamp(8px, 2vw, 12px);">
+                <button id="btn-casiers" onclick="showSection('casiers')" style="padding:clamp(14px, 3.5vw, 18px);border:none;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;font-weight:700;border-radius:clamp(8px, 2vw, 12px);cursor:pointer;box-shadow:0 4px 15px rgba(102,126,234,0.4);">
+                    🗄️ CASIERS
+                </button>
+                <button id="btn-equipements" onclick="showSection('equipements')" style="padding:clamp(14px, 3.5vw, 18px);border:none;background:#f3f4f6;color:#6b7280;font-weight:700;border-radius:clamp(8px, 2vw, 12px);cursor:pointer;">
+                    📦 ÉQUIPEMENTS
+                </button>
+                <button id="btn-utilisateurs" onclick="showSection('utilisateurs')" style="padding:clamp(14px, 3.5vw, 18px);border:none;background:#f3f4f6;color:#6b7280;font-weight:700;border-radius:clamp(8px, 2vw, 12px);cursor:pointer;">
+                    👤 UTILISATEURS
+                </button>
+            </div>
+        </div>
+
+        <!-- SECTION CASIERS -->
+        <div id="section-casiers" style="display:block;"></div>
+
+        <!-- SECTION ÉQUIPEMENTS -->
+        <div id="section-equipements" style="display:none;"></div>
+
+        <!-- SECTION UTILISATEURS -->
+        <div id="section-utilisateurs" style="display:none;"></div>
+
+        <!-- MODAL ASSIGNATION -->
+        <div id="modal-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:1000;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);" onclick="closeModal()"></div>
+        <div id="modal-assignation" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;border-radius:clamp(12px, 3vw, 20px);padding:clamp(20px, 4vw, 30px);max-width:600px;width:calc(100% - 20px);max-height:95vh;overflow-y:auto;z-index:1001;box-shadow:0 20px 60px rgba(0,0,0,0.3);"></div>
+    </div>
+    
+    <script>
+        // Capturer les erreurs dans la console uniquement
+        window.onerror = function(msg, url, line, col, error) {
+            console.error('🔴 Erreur JS:', msg, 'Ligne:', line, error);
+            return true; // Empêche l'affichage de l'erreur par défaut
+        };
+    </script>
+    <script src="unified-app.js"></script>
+    <script>
+        // Vérifier que le JS s'est chargé
+        setTimeout(() => {
+            if (typeof STORAGE_KEYS === 'undefined') {
+                const warningDiv = document.createElement('div');
+                warningDiv.style.cssText = 'position:fixed;top:10px;left:10px;background:orange;color:white;padding:20px;border-radius:10px;z-index:9999;';
+                warningDiv.innerHTML = '<strong>⚠️ unified-app.js ne s\'est pas chargé !</strong><br>Vérifiez le fichier.';
+                document.body.appendChild(warningDiv);
+            } else {
+                const successDiv = document.createElement('div');
+                successDiv.style.cssText = 'position:fixed;bottom:10px;right:10px;background:green;color:white;padding:15px;border-radius:10px;z-index:9999;';
+                successDiv.innerHTML = '✅ JS chargé';
+                document.body.appendChild(successDiv);
+                setTimeout(() => successDiv.remove(), 2000);
+            }
+        }, 500);
+    </script>
+</body>
+</html>
