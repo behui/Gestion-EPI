@@ -1,0 +1,33 @@
+# Sécurité Firebase
+.env
+.env.local
+.env.production
+firebase-debug.log
+firestore-debug.log
+.firebase/
+
+# Backups & Tests
+BACKUP_*/
+test*.html
+test*.js
+*debug*.html
+*debug*.js
+
+# Documentation interne
+AIDE-*.md
+GUIDE-*.md
+PLAN-*.md
+
+# Temporaires
+*.tmp
+*.log
+*.bak
+*.bat
+*.ps1
+*.zip
+
+# Système
+.DS_Store
+Thumbs.db
+.vscode/
+node_modules/
