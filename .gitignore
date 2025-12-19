@@ -1,0 +1,98 @@
+# Ne pas inclure dans Git
+
+# ========== SÉCURITÉ FIREBASE ==========
+# Variables d'environnement (contient les clés sensibles)
+.env
+.env.local
+.env.production
+
+# Logs Firebase
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Cache Firebase
+.firebase/
+
+# Backups
+BACKUP_*/
+fichier html gifhub/
+
+# Fichiers temporaires
+*.tmp
+*.log
+*.bak
+
+# Scripts de développement
+*.bat
+*.ps1
+*.zip
+
+# Fichiers avec clés Firebase exposées (NE JAMAIS PUBLIER)
+test*.html
+test*.js
+*debug*.html
+*debug*.js
+firebase-config.js
+
+# Documentation interne (ne pas publier)
+AIDE-*.md
+CORRECTION-*.txt
+DIAGNOSTIC-*.txt
+FIX-*.md
+FIX-*.txt
+GUIDE-*.txt
+GUIDE-*.md
+!QUICK-START.md
+INSTALLATION-*.md
+PLAN-*.md
+RAPPORT-*.md
+VERSION-*.txt
+UPLOAD-*.txt
+UPLOAD-*.ps1
+GITHUB-*.md
+GITHUB-*.txt
+*PHASE*.js
+*PHASE*.md
+SECURITE-*.md
+
+# Fichiers texte temporaires
+gestion html.txt
+gestion-casiers html.txt
+*.txt
+!robots.txt
+
+# Fichiers de test/debug (ne pas déployer en production)
+fix-*.html
+test-*.html
+setup-superadmin.html
+reset-password.html
+diagnostic-*.html
+activer-compte.html
+nettoyage-*.html
+reset-admin.html
+test-automatique.html
+
+# Archives
+APPLICATION-*.zip
+UPLOAD-*.zip
+
+# Dossier functions (si non utilisé)
+functions/node_modules/
+functions/.env
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Fichiers VS Code
+.vscode/
+
+# Node modules (si projet npm)
+node_modules/
+package-lock.json
+
+# Environnement
+.env
+.env.local
